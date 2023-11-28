@@ -322,7 +322,7 @@ constructor() {
                 <div style="display:flex;flex-direction:row;justify-content: center;align-items: center;font-size: large;"  >setup device:
                 ${this.getLD2410DeviceNameDropdown(this.config.devices_name)}
                 <div style="flex-grow:1"></div>
-                 <ha-icon class="option" style="cursor: pointer;" icon="mdi:${this._show_options == false ? 'cog-outline' : 'arrow-left-circle'} " @click="${() => { this._show_options = !this._show_options ; this._show_main = !this._show_main; }}"></ha-icon>
+                 <ha-icon class="option" style="cursor: pointer;" icon="${this._show_options === false ? 'mdi:cog-outline' : 'mdi:arrow-left-circle'}" @click="${() => { this._show_options = !this._show_options ; this._show_main = !this._show_main; }}"></ha-icon>
                 </div>
                 <hr>
                 ${this._show_options ? html`
