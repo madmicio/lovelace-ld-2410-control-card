@@ -1,6 +1,6 @@
 {
     "name": "LD2410 Control card",
     "filename": "lovelace-ld2410-control-card.js",
-    "content_in_root": true,
+    "content_in_root": false,
     "render_readme" : true
     }
