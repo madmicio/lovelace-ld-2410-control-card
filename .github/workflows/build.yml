@@ -23,5 +23,5 @@ jobs:
       - name: Archive built file
         uses: actions/upload-artifact@v3
         with:
-          name: lovelace-ld2410-control-card.ts
-          path: dist/lovelace-ld2410-control-card.ts
+          name: lovelace-ld2410-control-card.js
+          path: dist/lovelace-ld2410-control-card.js
