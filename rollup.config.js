@@ -32,7 +32,7 @@ const plugins = [
 
 export default [
     {
-        input: "src/lovelace-ld2410-card.ts",
+        input: "src/lovelace-ld2410-control-card.ts",
         output: {
             dir: "dist",
             format: "es",
