@@ -361,7 +361,7 @@ constructor() {
                             max="255" 
                             .value="${this.hass.states[devices[this.ld2410Name].lightTreshold]?.state}"  
                             @input=${this.onRangeInputMove} 
-                            @change=${e => this._setNumber_direct(devices[this.ld2410Name].lightTreshold, e.target.value)}> 
+                            @change=${e => this._setNumber_direct(devices[this.ld2410Name].lightTreshold, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
                         <div class="lux-center-item">${this.hass.states[devices[this.ld2410Name].lightTreshold]?.state}</div>
                         <div class="lux-center-item">${engeneerinMode === 'on' ? this.hass.states[devices[this.ld2410Name].lightSensor]?.state : 'eng off' }</div>
                     </div>
@@ -447,7 +447,7 @@ constructor() {
         <div class="info-container">
                     <div class="info-item">
                         <div class="info-item-title">Timeout</div>
-                        <input class="div-timeout"  type="number" id="timeout" name="timeout" min="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.min}" max="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.max}" .value="${this.hass.states[devices[this.ld2410Name].timeOut]?.state}"  @change=${e => this._setNumber_direct(devices[this.ld2410Name].timeOut, e.target.value)}>
+                        <input class="div-timeout"  type="number" id="timeout" name="timeout" min="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.min}" max="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.max}" .value="${this.hass.states[devices[this.ld2410Name].timeOut]?.state}"  @change=${e => this._setNumber_direct(devices[this.ld2410Name].timeOut, null, e.target.value)}>
                     </div>
 
                     <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].outPinStatus)}>
@@ -627,7 +627,7 @@ constructor() {
             max="8" 
             .value="${this.MovingDistanceNumber}"  
             @input=${this.onRangeInputMove} 
-            @change=${e => this._setNumber_direct(devices[this.ld2410Name].move_distance_n_gates, e.target.value)}> 
+            @change=${e => this._setNumber_direct(devices[this.ld2410Name].move_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
 
             
             
@@ -771,7 +771,7 @@ constructor() {
             max="8" 
             .value="${this.StillDistanceNumber}"  
             @input=${this.onRangeInputStill} 
-            @change=${e => this._setNumber_direct(devices[this.ld2410Name].still_distance_n_gates, e.target.value)}> 
+            @change=${e => this._setNumber_direct(devices[this.ld2410Name].still_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
 
             
             
@@ -914,7 +914,7 @@ constructor() {
 
       }
       
-      _setNumber_direct(entity_id, value) {
+      _setNumber_direct(entity_id, engineering_switch, value) {
         this.hass.callService("number", "set_value", {
             entity_id: entity_id,
             value: value
@@ -922,7 +922,7 @@ constructor() {
         // Inserimento di un ritardo di 2 secondi prima della successiva chiamata di servizio
         setTimeout(() => {
             this.hass.callService("switch", "turn_on", {
-                entity_id: this.config.enginering_mode
+                entity_id: engineering_switch
             });
         }, 2000); // 2000 millisecondi equivalgono a 2 secondi
       }
