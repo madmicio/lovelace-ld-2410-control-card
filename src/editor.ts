@@ -97,76 +97,11 @@ class LgD2410CardEditor extends LitElement {
     this.dispatchEvent(event);
   }
 
-  colorsConfigChanged(ev) {
-    // Controlla se l'evento è scatenato da un'icona
-    // if (ev.target.tagName === "HA-ICON") {
-    //   const inputName = ev.target.getAttribute("data-input-name");
-    //   if (inputName) {
-    //     const inputElement = this.shadowRoot.querySelector(`[name="${inputName}"]`) as any;
-    //     if (inputElement) {
-    //       // Imposta l'input su una stringa vuota
-    //       inputElement.value = "";
 
-    //       // Aggiorna la configurazione
-    //       const _config = Object.assign({}, this._config);
-    //       _config["colors"] = { ...(_config["colors"] ?? {}) };
-    //       _config["colors"][inputName] = "";
-    //       this._config = _config;
 
-    //       // Invia l'evento "config-changed"
-    //       const event = new CustomEvent("config-changed", {
-    //         detail: { config: _config },
-    //         bubbles: true,
-    //         composed: true,
-    //       });
-    //       this.dispatchEvent(event);
-    //     }
-    //   }
-    // } else {
-      // Se l'evento non proviene da un'icona, gestisci la modifica dell'input come al solito
-      const _config = Object.assign({}, this._config);
-      _config["devices_name"] = { ...(_config["devices_name"] ?? {}) };
-      _config["devices_name"][ev.target.name.toString()] = ev.target.value;
-      this._config = _config;
 
-      // Invia l'evento "config-changed"
-      const event = new CustomEvent("config-changed", {
-        detail: { config: _config },
-        bubbles: true,
-        composed: true,
-      });
-      this.dispatchEvent(event);
-    }
-//   }
 
-  getLD2410DeviceNameDropdown(optionValue){
-    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name' );
-    let heading = 'device name selector';
-    let blankEntity = html``;
-    if(this._config.device_name == '' ) {
-    blankEntity = html `<option value="" selected> - - - - </option> `;
-    }
-    return html`
-            ${heading}:<br>
-            <select name="device_name" id="device_name" class="select-item" .value="${optionValue}"
-                    @focusout=${this.configChanged}
-                    @change=${this.configChanged} >
-                ${blankEntity}
-                ${precenceDeviceSelector.map((eid) => {
-                    
-                    if (eid != this._config.device_name) {
-                        return html`<option value="${this.hass.states[eid].state}">${this.hass.states[eid].state || eid}</option> `;
-                    }
-                    else {
-                        return html`<option value="${this.hass.states[eid].state}" selected>${this.hass.states[eid].state || eid}</option> `;
-                    }
-                    })}
-            </select>
-            <br>
-            <br>`
-}
-
-selectColors(config) {
+selectLDdevice(config) {
     let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
     let heading = 'device name selector';
     let blankEntity = html``;
@@ -175,16 +110,16 @@ selectColors(config) {
     //     blankEntity = html`<option value="" selected> - - - - </option>`;
     // }
 
-    if (!config || !config.devices_name) {
-        config = { devices_name: {} };
+    if (!config || !config.device_name) {
+        config = { device_name: {} };
     }
     const pippo = this._config.device_name
 
     return html`
         <div class="heading">${heading}:</div>
         <select name="ld_device" id="ld_device" class="select-item" .value="${config}"
-                @focusout=${this.colorsConfigChanged}
-                @change=${this.colorsConfigChanged}>
+                @focusout=${this.deviceConfigChanged}
+                @change=${this.deviceConfigChanged}>
             ${blankEntity}
             ${precenceDeviceSelector.map((eid) => {
 
@@ -196,18 +131,29 @@ selectColors(config) {
     `;
 }
 
+  deviceConfigChanged(ev) {
+      const _config = Object.assign({}, this._config);
+      _config["device_name"] = { ...(_config["device_name"] ?? {}) };
+      _config["device_name"][ev.target.name.toString()] = ev.target.value;
+      this._config = _config;
 
+      const event = new CustomEvent("config-changed", {
+        detail: { config: _config },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
+    }
 
 
   render() {
 
 
     return html`
-    <
-            <!-- ${this.getLD2410DeviceNameDropdown(this._config.devices_name)} -->
-            <!-- ${this.selectColors(this._config.devices_name)} -->
 
+            ${this.selectLDdevice(this._config.devices_name)}
 
+prova
             Other functionalities must be configured manually in YAML editor
         `;
   }
