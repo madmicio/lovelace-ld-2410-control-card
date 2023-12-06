@@ -17,12 +17,11 @@ jobs:
 
       - name: Build
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Archive built file
         uses: actions/upload-artifact@v3
         with:
-          name: ampli-panel-card.js
-          path: dist/ampli-panel-card.js
-
+          name: lovelace-ld2410-control-card.js
+          path: dist/lovelace-ld2410-control-card.js
