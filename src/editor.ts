@@ -3,51 +3,15 @@ import { customElement } from "lit/decorators";
 import { html, css, LitElement } from "lit";
 
 import { HomeAssistantFixed } from "./types";
-import { EDITOR_CARD_TAG_NAME } from "./const";
-import { getEntitiesByNameAndType, getdeviceName } from "./utils";
+import { EDITOR_CARD_TAG_NAME, AvReceiverdevicemap } from "./const";
+import { getMediaPlayerEntitiesByPlatform } from "./utils";
 
 
-const avreceivers = {
-  "anthemav": {
-    "friendlyName": "Anthem A/V Receivers",
-  },
-  "arcam_fmj": {
-    "friendlyName": "Arcam FMJ Receivers",
-  },
-  "denonavr": {
-    "friendlyName": "Denon, Marantz A/V Receivers",
-  },
-  "heos": {
-    "friendlyName": "Denon heos A/V Receivers",
-  },
-  "cast": {
-    "friendlyName": "Google Cast ",
-  },
-  "harman_kardon_avr": {
-    "friendlyName": "Harman Kardon AVR",
-  },
-  "monoprice": {
-    "friendlyName": "Monoprice 6-Zone Amplifier",
-  },
-  "onkyo": {
-    "friendlyName": "Onkyo A/V Receivers",
-  },
-  "sonos": {
-    "friendlyName": "Sonos",
-  },
-  "pws66i": {
-    "friendlyName": "Soundavo WS66i 6-Zone Amplifier",
-  },
-  "yamaha": {
-    "friendlyName": "Yamaha Network Receivers",
-  },
-}
 
-const AvReceiverdevicemap = new Map(Object.entries(avreceivers));
 
 
 @customElement(EDITOR_CARD_TAG_NAME)
-class LgD2410CardEditor extends LitElement {
+class AmpliPanelCardEditor extends LitElement {
   private _config: any;
   private hass: HomeAssistantFixed;
 
@@ -101,49 +65,145 @@ class LgD2410CardEditor extends LitElement {
 
 
 
-selectLDdevice(config) {
-    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
-    let heading = 'device name selector';
-    let blankEntity = html``;
-    
-    // if (this._config.devices_name.ld_device == '') {
-    //     blankEntity = html`<option value="" selected> - - - - </option>`;
-    // }
-
-    if (!config || !config.device_name) {
-        config = { device_name: {} };
-    }
-    const pippo = this._config.device_name
-
+  getDeviceAVReceiverDropdown(optionvalue) {
+    const familykeys = [...AvReceiverdevicemap.keys()];
+    const blankEntity = (!this._config.av_receiver_family || this._config.av_receiver_family === '')
+    ? html`<option value="" selected> - - - - </option>`
+    : '';
     return html`
-        <div class="heading">${heading}:</div>
-        <select name="ld_device" id="ld_device" class="select-item" .value="${config}"
-                @focusout=${this.deviceConfigChanged}
-                @change=${this.deviceConfigChanged}>
+        <div>AV-Receiver config option:</div>
+        <div style="display: flex;width: 40ch;align-items: center;">
+         <select 
+            name="av_receiver_family"
+            id="av_receiver_family"
+            class="select-item"
+            style="width:100%;"
+            .value=${optionvalue}
+            @focusout=${this.configChanged}
+            @change=${this.configChanged}>
             ${blankEntity}
-            ${precenceDeviceSelector.map((eid) => {
-
-                    return html`<option value="${eid}">${this.hass.states[eid].state || eid}</option> `;
-
-            })}
-        </select>
-    </div>
+            ${familykeys.map((family) => {
+              const receiverData = AvReceiverdevicemap.get(family);
+              return html`
+                <option value="${family}" ?selected=${optionvalue === family}>
+                  ${receiverData.friendlyName}
+                </option>
+              `;})}
+          </select>
+          ${this._config.av_receiver_family && this._config.av_receiver_family != '' ? html`
+          <ha-icon 
+            style="padding-left: 0.8em;"
+            icon="mdi:trash-can-outline" 
+            @click=${this._erase_av_receiver}
+            @mouseover=${() => this.focus()}
+          ></ha-icon>`
+          : ''}
+        </div>
+        <br />
     `;
-}
+  }
 
-  deviceConfigChanged(ev) {
-      const _config = Object.assign({}, this._config);
-      _config["device_name"] = { ...(_config["device_name"] ?? {}) };
-      _config["device_name"][ev.target.name.toString()] = ev.target.value;
-      this._config = _config;
-
-      const event = new CustomEvent("config-changed", {
-        detail: { config: _config },
-        bubbles: true,
-        composed: true,
-      });
-      this.dispatchEvent(event);
+  getMediaPlayerEntityDropdown(optionValue) {
+    if (this._config.av_receiver_family) {
+      const mediaPlayerEntities = getMediaPlayerEntitiesByPlatform(this.hass, optionValue);
+      const blankEntity = (this._config.entity === '' || !mediaPlayerEntities.includes(optionValue))
+        ? html`<option value="" selected> - - - - </option>`
+        : '';
+      return html`
+                A-Receiver entity:<br>
+                <select name="entity" id="entity" class="select-item" .value="${optionValue}"
+                        @focusout=${this.configChanged}
+                        @change=${this.configChanged}>
+                    ${blankEntity}
+                    ${mediaPlayerEntities.map((eid) => html`
+                        <option value="${eid}" ?selected=${eid === this._config.entity}>
+                            ${this.hass.states[eid].attributes.friendly_name || eid}
+                        </option>
+                    `)}
+                </select>
+                <br><br>
+            `;
+    } else {
+      return html``; // Gestire il caso in cui `deviceFamily` non corrisponda a nessuna piattaforma
     }
+  }
+
+  getMediaPlayerZone2(optionValue) {
+    if (this._config.entity || this._config.entity === '') {
+      const mediaPlayerEntities = getMediaPlayerEntitiesByPlatform(this.hass, optionValue);
+      const blankEntity = (this._config.entity === '' || !mediaPlayerEntities.includes(optionValue))
+        ? html`<option value="" selected> - - - - </option>`
+        : '';
+      return html`
+                Zone 2 entity (option):<br>
+                <select name="zone2" id="zone2" class="select-item" .value="${optionValue}"
+                        @focusout=${this.configChanged}
+                        @change=${this.configChanged}>
+                    ${blankEntity}
+                    ${mediaPlayerEntities.map((eid) => html`
+                        <option value="${eid}" ?selected=${eid === this._config.entity}>
+                            ${this.hass.states[eid].attributes.friendly_name || eid}
+                        </option>
+                    `)}
+                </select>
+                <br><br>
+            `;
+    } else {
+      return html``; 
+    }
+  }
+
+  _erase_av_receiver() {
+    this._config.av_receiver_family = '';
+    this.requestUpdate(); // Aggiunta per forzare il render
+  }
+
+  setAmpliName(ampliNameValue) {
+    if (this._config.av_receiver_family) {
+    let heading = 'AV receiver Brand Name (option):';
+    return html`
+            ${heading}<br>
+            <input type="text" name="brand" id="brand" style="width: 37.8ch;padding: .6em; font-size: 1em;" .value="${this._config.av_receiver_family ? AvReceiverdevicemap.get(this._config.av_receiver_family).name : "Receiver Name"}"
+                   @input=${this.configChanged}
+            <br><br>
+        `;
+      } else {
+        return html``; 
+      }
+  }
+
+  setAmpliInfo(ampliNameValue) {
+    if (this._config.av_receiver_family) {
+    let heading = 'AV receiver Model Description (option):';
+    return html`
+            ${heading}<br>
+            <input type="text" name="info" id="info" style="width: 37.8ch;padding: .6em; font-size: 1em;" .value="${ampliNameValue}"
+                   @input=${this.configChanged}
+            <br><br>
+        `;
+      } else {
+        return html``; 
+      }
+  }
+
+  setZona1Name(ampliNameValue) {
+    let heading = 'AV receiver Model Description (option):';
+    return html`
+            ${heading}<br>
+            <input type="text" name="name" id="name" style="width: 37.8ch;padding: .6em; font-size: 1em;" .value="${ampliNameValue}"
+                   @input=${this.configChanged}
+            <br><br>
+        `;
+  }
+  setZona2Name(ampliNameValue) {
+    let heading = 'AV receiver Model Description (option):';
+    return html`
+            ${heading}<br>
+            <input type="text" name="name_zona2" id="name_zona2" style="width: 37.8ch;padding: .6em; font-size: 1em;" .value="${ampliNameValue}"
+                   @input=${this.configChanged}
+            <br><br>
+        `;
+  }
 
 
   render() {
@@ -151,7 +211,13 @@ selectLDdevice(config) {
 
     return html`
 
-            ${this.selectLDdevice(this._config.devices_name)}
+      ${this.getDeviceAVReceiverDropdown(this._config.av_receiver_family)}
+      ${this.getMediaPlayerEntityDropdown(this._config.av_receiver_family)}
+      ${this.getMediaPlayerZone2(this._config.av_receiver_family)}
+      ${this.setAmpliName(this._config.av_receiver_family)}
+      ${this.setAmpliInfo(this._config.info)}
+      ${this.setZona1Name(this._config.name)} 
+      ${this.setZona2Name(this._config.name_zona2)}
 
 prova
             Other functionalities must be configured manually in YAML editor

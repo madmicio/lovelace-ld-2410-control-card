@@ -26,7 +26,7 @@ jobs:
 
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/lovelace-ld2410-control-card.js
-          asset_name: lovelace-ld2410-control-card.js
+          file: dist/ampli-panel-card.ts
+          asset_name: ampli-panel-card.ts
           tag: ${{ github.ref }}
           overwrite: true
