@@ -1,7 +1,7 @@
 {
-    "name": "lovelace-ampli-panel-card",
+    "name": "lovelace-ld2410-control-card",
     "version": "v1.1.3-typescript",
-    "description": "AV Receiver Card",
+    "description": "LD2410 Card",
     "keywords": [
         "home-assistant",
         "homeassistant",
@@ -10,8 +10,8 @@
         "lovelace",
         "custom-cards"
     ],
-    "module": "ampli-panel-card.js",
-    "repository": "git@github.com:madmicio/ampli-panel-card.git",
+    "module": "lovelace-ld2410 control-card.js",
+    "repository": "git@github.com:madmicio/lovelace-ld2410-card.git",
     "author": "Maurizio <madmicio@tiscali.it>",
     "license": "MIT",
     "dependencies": {

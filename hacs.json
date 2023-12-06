@@ -1,6 +1,6 @@
 {
-    "name": "AV Receiver control card",
-    "filename": "ampli-panel-card.js",
+    "name": "LD2410 Control card",
+    "filename": "lovelace-ld2410-control-card.js",
     "content_in_root": false,
     "render_readme" : true
     }
