@@ -18,7 +18,8 @@
         "custom-card-helpers": "^1.9.0",
         "home-assistant-js-websocket": "^8.0.1",
         "lit": "^2.8.0",
-        "lit-html": "^3.0.2"
+        "lit-html": "^3.0.2",
+        "nouislider": "^15.7.1"
     },
     "devDependencies": {
         "@babel/core": "^7.15.0",

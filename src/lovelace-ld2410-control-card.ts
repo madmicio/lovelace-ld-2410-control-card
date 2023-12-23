@@ -1,8 +1,6 @@
 import { type CSSResultGroup , html, LitElement } from "lit";
 import { customElement, property } from 'lit/decorators';
-import { TemplateResult } from 'lit-html';
 import { HomeAssistant } from "custom-card-helpers";
-import { getEntitiesByNameAndType, getdeviceName } from "./utils";
 import styles from './styles'
 
 import "./editor";
@@ -208,7 +206,7 @@ constructor() {
           const stillDistance: number = Number(this.hass.states[devices[this.ld2410Name].StillDistanceSensor]?.state);
 
          
-
+          
 
             this.MovingDistanceNumber = this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state;
             this.StillDistanceNumber = this.hass.states[devices[this.ld2410Name].still_distance_n_gates]?.state;
@@ -217,8 +215,13 @@ constructor() {
             let calculatedPercentageMovingDistance;
             let calculatedPercentageStillDistance;
             let calculateddistanceSensor;
+            let distanceSvgMan;
+            let distanceSvgManBar;
             if (this.hass.states[devices[this.ld2410Name].distanceResolution]?.state === '0.75m') {
                 distanzaArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
+                distanceSvgMan = ((movingDistance / 600) * 400) + 20;
+                distanceSvgManBar = (300 / 600) * 425;
+
                 calculatedPercentageMovingDistance = (movingDistance / 600) * 88;
                 calculatedPercentageStillDistance = (stillDistance / 600) * 88;
                 calculateddistanceSensor = (movingDistantSensor / 600) * 88;
@@ -231,8 +234,21 @@ constructor() {
             const movingDistancePerc: number = Number(calculatedPercentageMovingDistance > 88 ? 88 : calculatedPercentageMovingDistance);
             const stillDistancePerc: number = Number(calculatedPercentageStillDistance > 88 ? 88 : calculatedPercentageStillDistance);
             const DistancePerc: number = Number(calculateddistanceSensor > 88 ? 88 : calculateddistanceSensor);
-  
+            const valore: number = Number(this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state)
+
+            // Verifica se il valore è un numero valido
+            if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
+                // Il valore è valido, imposta il massimo dell'input
+                var maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+
+                console.log(maxDistanza)
+            } else {
+                // Il valore non è valido, gestisci l'errore o fornisci un valore di default
+                console.error("Valore non valido");
+            }
           return html`
+          ${distanceSvgMan}
+          ${maxDistanza}
             <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -444,6 +460,11 @@ constructor() {
 
         <!-- #############################################################  fine options  ############################################################# -->
 
+
+
+
+
+
         <div class="info-container">
                     <div class="info-item">
                         <div class="info-item-title">Timeout</div>
@@ -474,72 +495,109 @@ constructor() {
                     ` : html` `}
                 </div>
 
-                <svg version="1.1" id="ld_signal_simbol" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                    viewBox="0 0 7.33 7.33" style="enable-background:new 0 0 7.33 7.33;width:3%;fill:var(--primary-color);margin-top:35px;" xml:space="preserve">
-                <path d="M7.33,0L6,0c0,3.31-2.69,6-6,6l0,1.33l0,0C4.05,7.33,7.33,4.05,7.33,0 M4.67,0L3.33,0c0,1.84-1.49,3.33-3.33,3.33l0,1.34
-                    C2.58,4.67,4.67,2.58,4.67,0 M2,0L0,0l0,2C1.1,2,2,1.1,2,0"/>
-                </svg>
+                <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 450.6 76.4" style="enable-background:new 0 0 450.6 76.4;" xml:space="preserve">
+<style type="text/css">
+    .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
+    .meter-principale-testo{fill:var(--primary-text-color);font-family:'Arial-BoldMT';font-size:10px;}
+    .meter-principale-shepe{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
+    .primary_color{fill:var(--primary-color);}
+</style>
+<rect id="rettangolo_x5F_ruler" y="58.5" class="meter-principale-rettangolo" width="450.6" height="17.9"/>
+<g id="misure">
+    <rect id="barra-detection" x="0.6" y="58.3" style="fill:red;opacity: 0.40;" width="${distanceSvgManBar}" height="18.1"/>
+		<text id="gate-1-text_00000016071961384992556670000012793053045481635972_" transform="matrix(1.0488 0 0 1 9.7402 71.4121)" class="meter-principale-testo">0</text>
+	<path class="meter-principale-shepe" d="M16.1,67h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
+	<text id="gate-1-text" transform="matrix(1.0488 0 0 1 35.7798 71.4125)" class="meter-principale-testo">0,75m</text>
+	<path class="meter-principale-shepe" d="M67.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 85.7788 71.4125)" class="meter-principale-testo">1,50m</text>
+	<path class="meter-principale-shepe" d="M117.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 135.7778 71.4125)" class="meter-principale-testo">2,25m</text>
+	<path class="meter-principale-shepe" d="M167.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 185.7788 71.4125)" class="meter-principale-testo">3,00m</text>
+	<path class="meter-principale-shepe" d="M217.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 235.7788 71.4125)" class="meter-principale-testo">3,75m</text>
+	<path class="meter-principale-shepe" d="M267.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 285.7798 71.4125)" class="meter-principale-testo">4,50m</text>
+	<path class="meter-principale-shepe" d="M317.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 335.7778 71.4125)" class="meter-principale-testo">5,25m</text>
+	<path class="meter-principale-shepe" d="M367.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
+	
+		<text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 385.7769 71.9974)" class="meter-principale-testo">6,00m</text>
+	<path class="meter-principale-shepe" d="M417.1,68h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
+</g>
+<foreignobject transform="matrix(1 0 0 1 ${distanceSvgMan} 14)"    width="12" height="45">
+<svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve">
+<g id="man">
+<path class="primary_color" d="M6,9.7c0.6,0,1.4,0,2.5,0c2.4,0,3.5,3.1,3.5,4.6c0,3.3,0,6.8,0,11.7c0,1.5-1.5,0.6-1.7,1.9
+   C9.7,33.4,9.8,37.4,9,41.6c-0.1,0.6-0.7,1.6-2.3,1.6L6,44.9h0l-0.7-1.7c-1.7,0-2.2-1-2.3-1.6c-0.7-4.1-0.6-8.1-1.3-13.7
+   C1.5,26.6,0,27.5,0,26c0-4.9,0-8.4,0-11.7c0-1.6,1.1-4.6,3.5-4.6C4.5,9.7,5.4,9.7,6,9.7"/>
+<ellipse class="primary_color" cx="6" cy="4.7" rx="4.1" ry="4.1"/>
+</g>
+</svg>
+                </foreignobject>
 
-                <div style=" display:flex;">
-                    <div style="width:5%;background-color: transparent;"></div>
-                    <div style="width:${DistancePerc}%;background-color: transparent;"></div>
+<g id="radar">
 
-                    
-                    <svg version="1.1" id="ld_man_arrow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                        viewBox="0 0 14.53 22" style="enable-background:new 0 0 14.53 22;width: 7%; fill:var(--primary-color); cursor:pointer;" xml:space="preserve">
-                    <style type="text/css">
-                        .punta_greccia{fill:#D90D1D;}
-                        .asta_freccia{fill:#D90D1D;;stroke:#D90D1D;stroke-miterlimit:10;}
-                    </style>
-                    <path d="M6.53,0.2c-1,0-1.8,0.8-1.8,1.8s0.8,1.8,1.8,1.8S8.33,3,8.33,2S7.53,0.2,6.53,0.2 M7.15,4.87l-2,3.33H1.53V10h4.88
-                        l1.08-1.82l0.73,2.87l-2.49,4.54V22h1.8v-5l2.33-3.11L12.73,22h1.8L10.62,6.67l2.11,0.66V11h1.8V5.8L9.11,4.11
-                        c-0.16-0.05-0.33-0.08-0.5-0.08C7.99,4.03,7.45,4.37,7.15,4.87z"/>
-                    <g>
-                        <polygon class="punta_greccia" points="2.1,22 4.14,16.07 0.07,16.07 	"/>
-                        <line class="asta_freccia" x1="2.1" y1="10" x2="2.1" y2="16.07"/>
-                    </g>
-                    </svg>
+		<g id="layer1_00000146494627415306622150000013077120801947842442_" transform="translate(0,-740.55109)">
+			<path id="path4391_00000110451651967434578370000004409614462899860382_" class="primary_color" d="M15.5,756.4c2.5-2.4,4-5.7,4.2-9.3
+				l-3.3,0c-0.2,5.5-4.7,9.8-10.2,9.8L6,760.2C9.7,760.2,13,758.7,15.5,756.4L15.5,756.4z M16.3,747L16.3,747L16.3,747z"/>
+			<path id="path4395_00000080204113281266067360000004423022825113158022_" class="primary_color" d="M18.9,760c3.4-3.3,5.6-7.8,5.7-12.8
+				l-3.3,0c-0.3,8.2-7.1,14.8-15.3,14.8l-0.1,3.4C11,765.3,15.6,763.3,18.9,760L18.9,760z M20,764.8L20,764.8L20,764.8z"/>
+			<path id="path4381_00000158728040944148855660000011473676464589785535_" class="primary_color" d="M12,752.8c1.5-1.5,2.5-3.5,2.6-5.8
+				l-3.2,0c-0.1,2.8-2.4,5-5.2,5l-0.1,3.2C8.4,755.2,10.5,754.2,12,752.8L12,752.8z M11.4,746.9L11.4,746.9L11.4,746.9z"/>
+			<path id="path4411_00000083770962395965472580000005466728432597625011_" class="primary_color" d="M6.4,743.5c1.8,0,3.3,1.6,3.3,3.4
+				c0,1.8-1.6,3.3-3.4,3.3c-1.8,0-3.3-1.6-3.3-3.4C3,745,4.5,743.5,6.4,743.5l-0.1,3.3L6.4,743.5z"/>
+		</g>
+
+</g>
+</svg>
+
+                
 
                 </div>
-                
-                <svg version="1.1" id="meter_principale" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                    viewBox="0 0 450 18.13" style="enable-background:new 0 0 450 18.13;" xml:space="preserve">
-                <style type="text/css">
-                    .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
-                    .meter-principale-testo{fill:var(--primary-text-color);font-family:'Arial-BoldMT';font-size:10px;}
-                    .meter-principale-shepe{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-                </style>
-                <rect id="rettangolo_x5F_ruler" x="-0.56" y="0.18" class="meter-principale-rettangolo" width="450.56" height="17.95"/>
-                <g id="misure">
-                    
-                        <text id="gate-1-text_00000016071961384992556670000012793053045481635972_" transform="matrix(1.0488 0 0 1 9.1775 13.1239)" class="meter-principale-testo">0</text>
-                    <path class="meter-principale-shepe" d="M15.56,8.73h1.78c3.68,0,6.65-2.98,6.65-6.65V0.32"/>
-                    <text id="gate-1-text" transform="matrix(1.0488 0 0 1 35.2171 13.1242)" class="meter-principale-testo">${distanzaArray[0]}</text>
-                    <path class="meter-principale-shepe" d="M66.56,9.16h1.78C72.02,9.16,75,6.18,75,2.5V0.74"/>
-                    
-                        <text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 85.2161 13.1242)" class="meter-principale-testo">${distanzaArray[1]}</text>
-                    <path class="meter-principale-shepe" d="M116.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 135.2152 13.1242)" class="meter-principale-testo">${distanzaArray[2]}</text>
-                    <path class="meter-principale-shepe" d="M166.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 185.2162 13.1242)" class="meter-principale-testo">${distanzaArray[3]}</text>
-                    <path class="meter-principale-shepe" d="M216.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 235.2162 13.1242)" class="meter-principale-testo">${distanzaArray[4]}</text>
-                    <path class="meter-principale-shepe" d="M266.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 285.2171 13.1242)" class="meter-principale-testo">${distanzaArray[5]}</text>
-                    <path class="meter-principale-shepe" d="M316.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 335.2152 13.1242)" class="meter-principale-testo">${distanzaArray[6]}</text>
-                    <path class="meter-principale-shepe" d="M366.56,9.16h1.78c3.68,0,6.65-2.98,6.65-6.65V0.74"/>
-                    
-                        <text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 385.2142 13.7092)" class="meter-principale-testo">${distanzaArray[7]}</text>
-                    <path class="meter-principale-shepe" d="M416.56,9.74h1.78c3.68,0,6.65-2.98,6.65-6.65V1.33"/>
-                </g>
-                </svg>
+      
 
+
+            <div slider id="slider-distance">
+                <div>
+                <div inverse-left style="width:70%;"></div>
+                <div inverse-right style="width:70%;"></div>
+                <div range style="left:30%;right:40%;"></div>
+                <span thumb style="left:30%;"></span>
+                <span thumb style="left:60%;"></span>
+                <div sign style="left:30%;">
+                    <span id="value">30</span>
+                </div>
+                <div sign style="left:60%;">
+                    <span id="value">60</span>
+                </div>
+                </div>
+                <input type="range" tabindex="0" value="30" max="100" min="0" step="1" oninput="
+                this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
+                var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
+                var children = this.parentNode.childNodes[1].childNodes;
+                children[1].style.width=value+'%';
+                children[5].style.left=value+'%';
+                children[7].style.left=value+'%';children[11].style.left=value+'%';
+                children[11].childNodes[1].innerHTML=this.value;" />
+            
+                <input type="range" tabindex="0" value="60" max="100" min="0" step="1" oninput="
+                this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
+                var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
+                var children = this.parentNode.childNodes[1].childNodes;
+                children[3].style.width=(100-value)+'%';
+                children[5].style.right=(100-value)+'%';
+                children[9].style.left=value+'%';children[13].style.left=value+'%';
+                children[13].childNodes[1].innerHTML=this.value;" />
+            </div>                
 
                 `}
 
@@ -627,7 +685,7 @@ constructor() {
             max="8" 
             .value="${this.MovingDistanceNumber}"  
             @input=${this.onRangeInputMove} 
-            @change=${e => this._setNumber_direct(devices[this.ld2410Name].move_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
+            @change=${e => this._setNumber_direct_move(devices[this.ld2410Name].move_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
 
             
             
@@ -771,7 +829,7 @@ constructor() {
             max="8" 
             .value="${this.StillDistanceNumber}"  
             @input=${this.onRangeInputStill} 
-            @change=${e => this._setNumber_direct(devices[this.ld2410Name].still_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
+            @change=${e => this._setNumber_direct_still(devices[this.ld2410Name].still_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
 
             
             
@@ -913,19 +971,82 @@ constructor() {
         });
 
       }
-      
+
       _setNumber_direct(entity_id, engineering_switch, value) {
+        // Assicurati che il valore non sia inferiore a 2
+        const newValue = Math.max(2, parseFloat(value));
+    
         this.hass.callService("number", "set_value", {
             entity_id: entity_id,
-            value: value
+            value: newValue
         });
+    
         // Inserimento di un ritardo di 2 secondi prima della successiva chiamata di servizio
         setTimeout(() => {
             this.hass.callService("switch", "turn_on", {
                 entity_id: engineering_switch
             });
         }, 2000); // 2000 millisecondi equivalgono a 2 secondi
-      }
+    }
+      
+      _setNumber_direct_move(entity_id, engineering_switch, value) {
+        // Assicurati che il valore non sia inferiore a 2
+        const newValue = Math.max(2, parseFloat(value));
+    
+        // Ottenere il riferimento all'elemento input range per il movimento
+        const rangeInputMove = this.shadowRoot.getElementById('n_move') as HTMLInputElement;
+    
+        // Se il valore è inferiore a 2, imposta il valore dello slider a 2
+        if (parseFloat(value) < 2) {
+            rangeInputMove.value = '2';
+        }
+    
+        // Chiama il servizio per impostare il nuovo valore
+        this.hass.callService("number", "set_value", {
+            entity_id: entity_id,
+            value: newValue
+        });
+    
+        // Richiedi un aggiornamento del componente
+        this.requestUpdate();
+    
+        // Inserimento di un ritardo di 2 secondi prima della successiva chiamata di servizio
+        setTimeout(() => {
+            this.hass.callService("switch", "turn_on", {
+                entity_id: engineering_switch
+            });
+        }, 2000); // 2000 millisecondi equivalgono a 2 secondi
+    }
+
+    _setNumber_direct_still(entity_id, engineering_switch, value) {
+        // Assicurati che il valore non sia inferiore a 2
+        const newValue = Math.max(2, parseFloat(value));
+    
+        // Ottenere il riferimento all'elemento input range per la posizione ferma (still)
+        const rangeInputStill = this.shadowRoot.getElementById('n_still') as HTMLInputElement;
+    
+        // Se il valore è inferiore a 2, imposta il valore dello slider a 2
+        if (parseFloat(value) < 2) {
+            rangeInputStill.value = '2';
+        }
+    
+        // Chiama il servizio per impostare il nuovo valore
+        this.hass.callService("number", "set_value", {
+            entity_id: entity_id,
+            value: newValue
+        });
+    
+        // Richiedi un aggiornamento del componente
+        this.requestUpdate();
+    
+        // Inserimento di un ritardo di 2 secondi prima della successiva chiamata di servizio
+        setTimeout(() => {
+            this.hass.callService("switch", "turn_on", {
+                entity_id: engineering_switch
+            });
+        }, 2000); // 2000 millisecondi equivalgono a 2 secondi
+    }
+
 
     //   firstUpdated() {
     //     // Ottenere il riferimento all'elemento input range
@@ -946,30 +1067,30 @@ constructor() {
         // Imposta il valore di default di this.ld2410Name al valore selezionato dell'elemento select
         this.ld2410Name = selectElement.value;
     
-        // Ottenere il riferimento all'elemento input range per il movimento
-        const rangeInputMove = this.shadowRoot.getElementById('n_move') as HTMLInputElement;
+        // // Ottenere il riferimento all'elemento input range per il movimento
+        // const rangeInputMove = this.shadowRoot.getElementById('n_move') as HTMLInputElement;
         
     
-        // Aggiungi un listener per controllare il valore quando viene modificato
-        rangeInputMove.addEventListener('input', () => {
-            // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
-            if (parseInt(rangeInputMove.value) < 2) {
-                rangeInputMove.value = '2';
-            }
-            // console.log(rangeInputMove.value);
-        });
+        // // Aggiungi un listener per controllare il valore quando viene modificato
+        // rangeInputMove.addEventListener('input', () => {
+        //     // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
+        //     if (parseInt(rangeInputMove.value) < 2) {
+        //         rangeInputMove.value = '2';
+        //     }
+        //     // console.log(rangeInputMove.value);
+        // });
     
-        // Ottenere il riferimento all'elemento input range per la posizione ferma (still)
-        const rangeInputStill = this.shadowRoot.getElementById('n_still') as HTMLInputElement;
+        // // Ottenere il riferimento all'elemento input range per la posizione ferma (still)
+        // const rangeInputStill = this.shadowRoot.getElementById('n_still') as HTMLInputElement;
     
-        // Aggiungi un listener per controllare il valore quando viene modificato
-        rangeInputStill.addEventListener('input', () => {
-            // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
-            if (parseInt(rangeInputStill.value) < 2) {
-                rangeInputStill.value = '2';
-            }
-            // console.log(rangeInputStill.value);
-        });
+        // // Aggiungi un listener per controllare il valore quando viene modificato
+        // rangeInputStill.addEventListener('input', () => {
+        //     // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
+        //     if (parseInt(rangeInputStill.value) < 2) {
+        //         rangeInputStill.value = '2';
+        //     }
+        //     // console.log(rangeInputStill.value);
+        // });
     }
 
     onRangeInputMove(event: Event) {
