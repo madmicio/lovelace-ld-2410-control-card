@@ -140,6 +140,11 @@ constructor() {
                 "macAddress" : `sensor.${this.ld2410Name}_mac_address`,
                 "queryParams" : `button.${this.ld2410Name}_query_params`,
                 "restart" : `button.${this.ld2410Name}_restart`,
+                "zone1End" : `number.${this.ld2410Name}_zone_1_end_distance`,
+                "zone2End" : `number.${this.ld2410Name}_zone_2_end_distance`,
+                "zone1occupancy" : `binary_sensor.${this.ld2410Name}_zone_1_occupancy`,
+                "zone2occupancy" : `binary_sensor.${this.ld2410Name}_zone_2_occupancy`,
+                "zone3occupancy" : `binary_sensor.${this.ld2410Name}_zone_3_occupancy`,
               "gates": {
                 "g1": {
                   "gmove": `number.${this.ld2410Name}_g0_move_threshold`,
@@ -217,16 +222,35 @@ constructor() {
             let calculateddistanceSensor;
             let distanceSvgMan;
             let distanceSvgManBar;
+            const valore: number = Number(this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state)
+            var maxDistanza;
             if (this.hass.states[devices[this.ld2410Name].distanceResolution]?.state === '0.75m') {
                 distanzaArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
-                distanceSvgMan = ((movingDistance / 600) * 400) + 20;
-                distanceSvgManBar = (300 / 600) * 425;
+                // Verifica se il valore è un numero valido
+            if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
+                // Il valore è valido, imposta il massimo dell'input
+                maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+
+                
+            } else {
+                // Il valore non è valido, gestisci l'errore o fornisci un valore di default
+                console.error("Valore non valido");
+            }
+                distanceSvgMan = (movingDistance / maxDistanza) * 410;
 
                 calculatedPercentageMovingDistance = (movingDistance / 600) * 88;
                 calculatedPercentageStillDistance = (stillDistance / 600) * 88;
                 calculateddistanceSensor = (movingDistantSensor / 600) * 88;
             } else {
                 distanzaArray = ["0.20m", "0.40m", "0.60m", "0.80m", "1.00m", "1.20m", "1.40m", "1.60m"];
+                if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
+                    // Il valore è valido, imposta il massimo dell'input
+                    maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+    
+                    
+                } else {
+                    console.error("Valore non valido");
+                }
                 calculatedPercentageMovingDistance = (movingDistance / 160) * 88;
                 calculatedPercentageStillDistance = (movingDistance / 160) * 88;
                 calculateddistanceSensor = (movingDistantSensor / 160) * 88;
@@ -234,21 +258,18 @@ constructor() {
             const movingDistancePerc: number = Number(calculatedPercentageMovingDistance > 88 ? 88 : calculatedPercentageMovingDistance);
             const stillDistancePerc: number = Number(calculatedPercentageStillDistance > 88 ? 88 : calculatedPercentageStillDistance);
             const DistancePerc: number = Number(calculateddistanceSensor > 88 ? 88 : calculateddistanceSensor);
-            const valore: number = Number(this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state)
+            
+            const zone1 : number = Number(this.hass.states[devices[this.ld2410Name].zone1End]?.state)
+            const zone2 : number = Number(this.hass.states[devices[this.ld2410Name].zone2End]?.state)
 
-            // Verifica se il valore è un numero valido
-            if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
-                // Il valore è valido, imposta il massimo dell'input
-                var maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+            
 
-                console.log(maxDistanza)
-            } else {
-                // Il valore non è valido, gestisci l'errore o fornisci un valore di default
-                console.error("Valore non valido");
-            }
+
           return html`
+          ${this.hass.states[devices[this.ld2410Name].zone1occupancy]?.state}
+          ${this.hass.states[devices[this.ld2410Name].zone2occupancy]?.state}
+          ${this.hass.states[devices[this.ld2410Name].zone3occupancy]?.state}
           ${distanceSvgMan}
-          ${maxDistanza}
             <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -495,17 +516,157 @@ constructor() {
                     ` : html` `}
                 </div>
 
+    <!-- ###################################### indicatore ######################################### --> 
+
                 <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                        viewBox="0 0 450.6 130" style="enable-background:new 0 0 450.6 130;" xml:space="preserve">
+                <style type="text/css">
+                    .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
+                    .primary_color{fill:var(--primary-color);}
+
+                </style>
+                <g id="gruppo-gates-fissi">
+                    <rect id="rettangolo_x5F_ruler" y="71.8" class="meter-principale-rettangolo" width="450.6" height="17.9"/>
+
+                    <foreignobject transform="matrix(1 0 0 1 9 71.8)"    width="425" height="17.9"">
+                    <div Style="display:flex;flexdirection: row;justify-content:space-between;">
+                        <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                            viewBox="0 0 15 16" style="enable-background:new 0 0 15 16;width:15px" xml:space="preserve" >
+                        <style type="text/css">
+                            .meter-principale-testo{fill:var(--primary-text-color);font-size:10px;}
+                            .meter-principale-shape{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
+                        </style>
+                        <g id="_x3C_Gruppo_x3E_0">
+                            <text id="gate-0" transform="matrix(1.0438 0 0 1 -0.2324 14.1904)" class="meter-principale-testo">0</text>
+                            <path id="tacciato0" class="meter-principale-shape" d="M6,10.2h6.7c1,0,1.7-0.8,1.7-1.7V1.8"/>
+                        </g>
+                        </svg>
+
+                        ${
+                            Array.from({ length: this.MovingDistanceNumber }, (_, index) => {
+                                const testoSVG = distanzaArray[index % distanzaArray.length];
+                        
+                                return html`
+                                    <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                        viewBox="0 0 40 16" style="enable-background:new 0 0 40 16;width:40px;" xml:space="preserve">
+                                        <style type="text/css"></style>
+                                        <g id="_x3C_Gruppo_x3E_6">
+                                            <text id="gate-6_00000000190920724572184100000018113593952632234386_" transform="matrix(1.0438 0 0 1 0.7812 14.1904)" class="meter-principale-testo">
+                                                ${testoSVG}
+                                            </text>
+                                            <path id="tacciato6_00000026858519343495812740000007173033270969586816_" class="meter-principale-shape" d="M31.1,10.2h6.7c1,0,1.7-0.8,1.7-1.7V1.8"/>
+                                        </g>
+                                    </svg>
+                                `;
+                            })
+                        }
+                        </foreignobject>
+
+                        
+
+
+                    </div>
+                   
+                </g>
+                <foreignobject transform="matrix(1 0 0 1 17 27)"    width="422" height="45">
+                    
+                    <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                    viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;height: 45px;margin-left:${distanceSvgMan}px;" xml:space="preserve">
+                    <g id="man">
+                    <path class="primary_color" d="M6,9.7c0.6,0,1.4,0,2.5,0c2.4,0,3.5,3.1,3.5,4.6c0,3.3,0,6.8,0,11.7c0,1.5-1.5,0.6-1.7,1.9
+                    C9.7,33.4,9.8,37.4,9,41.6c-0.1,0.6-0.7,1.6-2.3,1.6L6,44.9h0l-0.7-1.7c-1.7,0-2.2-1-2.3-1.6c-0.7-4.1-0.6-8.1-1.3-13.7
+                    C1.5,26.6,0,27.5,0,26c0-4.9,0-8.4,0-11.7c0-1.6,1.1-4.6,3.5-4.6C4.5,9.7,5.4,9.7,6,9.7"/>
+                    <ellipse class="primary_color" cx="6" cy="4.7" rx="4.1" ry="4.1"/>
+                    </g>
+                    </svg>
+                  
+                </foreignobject>
+
+                <g id="radar">
+                    <g>
+                        <sodipodi:namedview  bordercolor="#666666" borderopacity="1.0" id="base" pagecolor="#ffffff" showgrid="false">
+                            </sodipodi:namedview>
+                        <g id="layer1_00000146494627415306622150000013077120801947842442_" transform="translate(0,-740.55109)">
+                            <path id="path4391_00000110451651967434578370000004409614462899860382_" class="primary_color" d="M15.5,764.7c2.5-2.4,4-5.7,4.2-9.3
+                                l-3.3,0c-0.2,5.5-4.7,9.8-10.2,9.8L6,768.5C9.7,768.5,13,767.1,15.5,764.7L15.5,764.7z M16.3,755.3L16.3,755.3L16.3,755.3z"/>
+                            <path id="path4395_00000080204113281266067360000004423022825113158022_" class="primary_color" d="M18.9,768.3c3.4-3.3,5.6-7.8,5.7-12.8
+                                l-3.3,0c-0.3,8.2-7.1,14.8-15.3,14.8l-0.1,3.4C11,773.6,15.6,771.6,18.9,768.3L18.9,768.3z M20,773.1L20,773.1L20,773.1z"/>
+                            <path id="path4381_00000158728040944148855660000011473676464589785535_" class="primary_color" d="M12,761.1c1.5-1.5,2.5-3.5,2.6-5.8
+                                l-3.2,0c-0.1,2.8-2.4,5-5.2,5l-0.1,3.2C8.4,763.5,10.5,762.6,12,761.1L12,761.1z M11.4,755.3L11.4,755.3L11.4,755.3z"/>
+                            <path id="path4411_00000083770962395965472580000005466728432597625011_" class="primary_color" d="M6.4,751.8c1.8,0,3.3,1.6,3.3,3.4
+                                c0,1.8-1.6,3.3-3.4,3.3c-1.8,0-3.3-1.6-3.3-3.4C3,753.3,4.5,751.8,6.4,751.8l-0.1,3.3L6.4,751.8z"/>
+                        </g>
+                    </g>
+                </g>
+                <foreignobject transform="matrix(1 0 0 1 0 34)"    width="445" height="100">
+
+                        <div slider id="slider-distance">
+                            <div>
+                            <div inverse-left style="width:${(zone1 / maxDistanza) * 100}%;${this.hass.states[devices[this.ld2410Name].zone1occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                            <div inverse-right style="width:${(100 - (zone2 / maxDistanza) * 100)}%;${this.hass.states[devices[this.ld2410Name].zone3occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                            <div range style="left:${(zone1 / maxDistanza) * 100}%;right:${(((zone2 / maxDistanza) * 100) - 100) * - 1 }%;${this.hass.states[devices[this.ld2410Name].zone2occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                            <span thumb style="left:${(zone1 / maxDistanza) * 100}%;"></span>
+                            <span thumb style="left:${(zone2/ maxDistanza) * 100}%;"></span>
+                            <div sign style="left:${(zone1 / maxDistanza) * 100}%;">
+                                ${zone1}
+                            </div>
+                            <div sign style="left:${(zone2 / maxDistanza) * 100}%;">
+                                ${zone2}
+                            </div>
+                            </div>
+                            <input type="range" tabindex="0" value="${zone1}" max="${maxDistanza || 600}" min="0" step="1" oninput="
+                            this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
+                            var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
+                            var children = this.parentNode.childNodes[1].childNodes;
+
+                            children[1].style.width=value+'%';
+                            children[3].style.width=((value - 100) * -1)+'%';
+                            children[5].style.left=value+'%';
+                            children[7].style.left=value+'%';children[11].style.left=value+'%';
+                            children[11].childNodes[1].innerHTML=this.value;" @change=${e => this._setNumber_zone(devices[this.ld2410Name].zone1End, e.target.value)}/>
+                        
+                            <input type="range" tabindex="0" value="${zone2}" max="${maxDistanza || 600}" min="0" step="1"  @change=${e => this._setNumber_zone(devices[this.ld2410Name].zone2End, e.target.value)} oninput="
+                            this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
+                            var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
+
+                            var children = this.parentNode.childNodes[1].childNodes;
+                            children[3].style.width=(100-value)+'%';
+                            children[5].style.right=(100-value)+'%';
+                            children[9].style.left=value+'%';children[13].style.left=value+'%';
+                            children[13].childNodes[1].innerHTML=this.value;" />
+                        </div>
+
+                </foreignobject>
+                </svg>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--                <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 450.6 76.4" style="enable-background:new 0 0 450.6 76.4;" xml:space="preserve">
 <style type="text/css">
     .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
-    .meter-principale-testo{fill:var(--primary-text-color);font-family:'Arial-BoldMT';font-size:10px;}
+    .meter-principale-testo{fill:var(--primary-text-color);font-size:10px;}
     .meter-principale-shepe{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-    .primary_color{fill:var(--primary-color);}
+    c
 </style>
 <rect id="rettangolo_x5F_ruler" y="58.5" class="meter-principale-rettangolo" width="450.6" height="17.9"/>
 <g id="misure">
-    <rect id="barra-detection" x="0.6" y="58.3" style="fill:red;opacity: 0.40;" width="${distanceSvgManBar}" height="18.1"/>
+
 		<text id="gate-1-text_00000016071961384992556670000012793053045481635972_" transform="matrix(1.0488 0 0 1 9.7402 71.4121)" class="meter-principale-testo">0</text>
 	<path class="meter-principale-shepe" d="M16.1,67h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
 	<text id="gate-1-text" transform="matrix(1.0488 0 0 1 35.7798 71.4125)" class="meter-principale-testo">0,75m</text>
@@ -532,7 +693,7 @@ constructor() {
 		<text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 385.7769 71.9974)" class="meter-principale-testo">6,00m</text>
 	<path class="meter-principale-shepe" d="M417.1,68h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
 </g>
-<foreignobject transform="matrix(1 0 0 1 ${distanceSvgMan} 14)"    width="12" height="45">
+<foreignobject transform="matrix(1 0 0 1 410 14)"    width="12" height="45">
 <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve">
 <g id="man">
@@ -560,6 +721,7 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
 </g>
 </svg>
 
+
                 
 
                 </div>
@@ -568,36 +730,38 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
 
             <div slider id="slider-distance">
                 <div>
-                <div inverse-left style="width:70%;"></div>
-                <div inverse-right style="width:70%;"></div>
-                <div range style="left:30%;right:40%;"></div>
-                <span thumb style="left:30%;"></span>
-                <span thumb style="left:60%;"></span>
-                <div sign style="left:30%;">
-                    <span id="value">30</span>
+                <div inverse-left style="width:${(zone1 /600) * 100}%;"></div>
+                <div inverse-right style="width:${(zone2 /600) * 100}%;"></div>
+                <div range style="left:${(zone1 /600) * 100}%;right:${(((zone2 /600) * 100) - 100) * - 1 }%;"></div>
+                <span thumb style="left:${(zone1 /600) * 100}%;"></span>
+                <span thumb style="left:${(zone2/600) * 100}%;"></span>
+                <div sign style="left:${(zone1 /600) * 100}%;">
+                    <span id="value">${zone1}</span>
                 </div>
-                <div sign style="left:60%;">
-                    <span id="value">60</span>
+                <div sign style="left:${(zone2 /600) * 100}%;">
+                    <span id="value">${zone2}</span>
                 </div>
                 </div>
-                <input type="range" tabindex="0" value="30" max="100" min="0" step="1" oninput="
+                <input type="range" tabindex="0" value="${zone1}" max="600" min="0" step="1" oninput="
                 this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
                 var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
                 var children = this.parentNode.childNodes[1].childNodes;
                 children[1].style.width=value+'%';
+                children[3].style.width=((value - 100) * -1)+'%';
                 children[5].style.left=value+'%';
                 children[7].style.left=value+'%';children[11].style.left=value+'%';
                 children[11].childNodes[1].innerHTML=this.value;" />
             
-                <input type="range" tabindex="0" value="60" max="100" min="0" step="1" oninput="
+                <input type="range" tabindex="0" value="${zone2}" max="600" min="0" step="1" oninput="
                 this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
                 var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
+                console.log(value);
                 var children = this.parentNode.childNodes[1].childNodes;
                 children[3].style.width=(100-value)+'%';
                 children[5].style.right=(100-value)+'%';
                 children[9].style.left=value+'%';children[13].style.left=value+'%';
                 children[13].childNodes[1].innerHTML=this.value;" />
-            </div>                
+            </div>   -->             
 
                 `}
 
@@ -971,6 +1135,15 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         });
 
       }
+
+      _setNumber_zone(entity_id, value) {
+        // Assicurati che il valore non sia inferiore a 2
+     
+        this.hass.callService("number", "set_value", {
+            entity_id: entity_id,
+            value: value
+        });
+    }
 
       _setNumber_direct(entity_id, engineering_switch, value) {
         // Assicurati che il valore non sia inferiore a 2

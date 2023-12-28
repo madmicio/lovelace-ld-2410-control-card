@@ -487,7 +487,7 @@ ha-card {
             height: 14px;
             border-radius: 10px;
             text-align: left;
-            margin: 20px 0 10px 0;
+            margin: 75px 0px 10px 8px;
           }
           
           [slider] > div {
@@ -501,10 +501,10 @@ ha-card {
             position: absolute;
             left: 0;
             height: 6px;
-            // border-radius: 10px;
+            border-radius: 10px;
             // background-color: #ccc;
-            background-color: red;
-            margin: 0 7px;
+            background: var(--primary-color);
+            // margin: 0 7px;
           }
           
           [slider] > div > [inverse-right] {
@@ -512,8 +512,8 @@ ha-card {
             right: 0;
             height: 6px;
             border-radius: 10px;
-            background-color: yellow;
-            margin: 0 7px;
+            background: var(--primary-color);
+            // margin: 0 7px;
           }
           
           [slider] > div > [range] {
@@ -521,7 +521,7 @@ ha-card {
             left: 0;
             height: 6px;
             border-radius: 14px;
-            background-color: #1abc9c;
+            background: var(--primary-color);;
           }
           
           // [slider] > div > [thumb] {
@@ -556,32 +556,34 @@ ha-card {
 
           [slider] > div > [thumb] {
             position: absolute;
-            margin-left: -11px;
+            margin-left: -3px;
             top: -10px;
             z-index: 3;
-            background-color: #1abc9c;
+            background-color: var(--primary-color); 
             color: #fff;
-            width: 28px;
+            width: 11px;
             height: 28px;
             border-radius: 28px;
-            -webkit-border-radius: 28px;
+            -webkit-border-radius: 2px;
             align-items: center;
             -webkit-justify-content: center;
             justify-content: center;
             text-align: center;
+            cursor: pointer;
           }
 
           [slider] > div > [thumb]:after {
             position: absolute;
             content: "";
-            left: 0;
+            left: 0px;
             border-radius: 16px;
-            top: -7px;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
+            top: -9px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
             border-bottom-width: 16px;
             border-bottom-style: solid;
-            border-bottom-color: #1abc9c;
+            border-bottom-color: var(--primary-color);
+            cursor: pointer;
           }
 
           // [slider] > div > [thumb] {
@@ -637,11 +639,12 @@ ha-card {
           
           div[slider] > input[type="range"]::-ms-thumb {
             pointer-events: all;
-            width: 28px;
+            width: 18px;
             height: 28px;
             border-radius: 0px;
             border: 0 none;
             background: red;
+            cursor: pointer;
           }
           
           div[slider] > input[type="range"]::-moz-range-thumb {
@@ -651,6 +654,7 @@ ha-card {
             border-radius: 0px;
             border: 0 none;
             background: red;
+            cursor: pointer;
           }
           
           div[slider] > input[type="range"]::-webkit-slider-thumb {
@@ -661,6 +665,7 @@ ha-card {
             border: 0 none;
             background: red;
             -webkit-appearance: none;
+            cursor: pointer;
           }
           
           div[slider] > input[type="range"]::-ms-fill-lower {
@@ -678,12 +683,12 @@ ha-card {
           }
           
           [slider] > div > [sign] {
-            opacity: 0.5;
+            opacity: 0;
             position: absolute;
             margin-left: -11px;
-            top: -72px;
+            top: -74px;
             z-index: 3;
-            background-color: #1abc9c;
+            background-color: var(--primary-color);
             color: #fff;
             width: 28px;
             height: 28px;
@@ -693,6 +698,9 @@ ha-card {
             -webkit-justify-content: center;
             justify-content: center;
             text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 28px;
           }
           
           [slider] > div > [sign]:after {
@@ -705,15 +713,10 @@ ha-card {
             border-right: 14px solid transparent;
             border-top-width: 16px;
             border-top-style: solid;
-            border-top-color: #1abc9c;
+            border-top-color: var(--primary-color);
           }
           
-          [slider] > div > [sign] > span {
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 28px;
-          }
-          
+
           [slider]:hover > div > [sign] {
             opacity: 1;
           }
