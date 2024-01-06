@@ -5,9 +5,10 @@
 ```yaml
 type: custom:ld2410-control-card
 devices_name:
-  - ld_device: ld2410test
-  - ld_device: telo-nero
-  - ld_device: fakeld
+  - device: ld2410test
+    name: soggiorno
+  - device: telo-nero
+    name: cucina
 ```
 
 
