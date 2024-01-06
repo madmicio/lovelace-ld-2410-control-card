@@ -47,6 +47,20 @@ export function getEntitiesByNameAndType(hass, platformName, partOfName, restOfN
     return filteredEntities.filter(entityId => re.test(entityId));
   }
 
+  // export function getdeviceName(hass, platformName, deviceName) {
+
+  //   let entities = Object.keys(hass.entities).filter(
+  //       (eid) => hass.entities[eid].platform === platformName
+  //     );
+    
+  //     let filteredEntities = entities.filter(entityId =>
+  //       entityId.includes(deviceName)
+  //     );
+  
+  //   const re = /sensor/;
+  //   return filteredEntities.filter(entityId => re.test(entityId));
+  // }
+
   export function getdeviceName(hass, platformName, deviceName) {
 
     let entities = Object.keys(hass.entities).filter(
@@ -57,6 +71,12 @@ export function getEntitiesByNameAndType(hass, platformName, partOfName, restOfN
         entityId.includes(deviceName)
       );
   
-    const re = /sensor/;
-    return filteredEntities.filter(entityId => re.test(entityId));
+      const re = /sensor/;
+      let sensorEntities = filteredEntities.filter(entityId => re.test(entityId));
+    
+      // Creare una lista di oggetti contenenti id entità e stato corrispondente
+      let entityStates = sensorEntities.map(entityId => hass.states[entityId].state);
+
+      return entityStates;
   }
+

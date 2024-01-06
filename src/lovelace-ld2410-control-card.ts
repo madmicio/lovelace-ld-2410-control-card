@@ -4,7 +4,7 @@ import { HomeAssistant } from "custom-card-helpers";
 import styles from './styles'
 
 import "./editor";
-// import { getld240Device } from "./utils";
+import { getdeviceName } from "./utils";
 import { HomeAssistantFixed, WindowWithCards } from "./types";
 import { CARD_TAG_NAME, CARD_VERSION, EDITOR_CARD_TAG_NAME } from "./const";
 
@@ -59,6 +59,21 @@ export class Ld2410CustomCard extends LitElement {
     return document.createElement(EDITOR_CARD_TAG_NAME);
 }
 
+    public static getStubConfig(hass: HomeAssistantFixed) {
+        let entities = getdeviceName(hass, 'esphome', 'ld2410_device_name');
+    
+        const entity = entities.length > 0 ? entities[0] : "nessun ld2410";
+    
+        return {
+        "type": `custom:${CARD_TAG_NAME}`,
+        "devices_name": [
+            {
+            "device": entity,
+            "name": entity
+            }
+        ]
+        };
+    }
 
    static get properties() {
     return {
@@ -66,7 +81,7 @@ export class Ld2410CustomCard extends LitElement {
         config: {},
         MovingDistanceNumber: { type: Number, reflect: true },
         StillDistanceNumber: { type: Number, reflect: true },
-        ld2410Name: {},
+        ld2410Name: { type: String, reflect: true },
         _parametroDistanza: {},
         _show_main: {},
         _show_options: {},
@@ -77,13 +92,14 @@ export class Ld2410CustomCard extends LitElement {
 
 constructor() {
     super();
-    this.ld2410Name = "";  // Imposta il valore iniziale a una stringa vuota
+
     this.handleSelectChange = this.handleSelectChange.bind(this);  // Bind del contesto per l'evento
     this._parametroDistanza = true;
     this._show_options = false;
     this._show_main = true;
     this._show_gmove = true;
     this._show_gstill = false;
+    
 }
     
     
@@ -95,6 +111,7 @@ constructor() {
     // }
     
     this.config = config;
+    this.ld2410Name = this.config.devices_name[0].device;
     }
 
     getCardSize() {
@@ -103,6 +120,8 @@ constructor() {
 
     
     render() {
+        
+        
         const browserName = this.getBrowserName();
         const cardWidth = this.getBoundingClientRect().width;
         const sliderWidth = (cardWidth - 52) / 8;
@@ -111,8 +130,7 @@ constructor() {
         
 
         
-        const devices = {
-            [this.ld2410Name]: {
+        const ld24xx = {
                 "engineering_mode" : `switch.${this.ld2410Name}_engineering_mode`,
                 "precence_sensor" : `binary_sensor.${this.ld2410Name}_presence`,
                 "DetectionDistance" : `sensor.${this.ld2410Name}_detection_distance`,
@@ -142,6 +160,7 @@ constructor() {
                 "restart" : `button.${this.ld2410Name}_restart`,
                 "zone1End" : `number.${this.ld2410Name}_zone_1_end_distance`,
                 "zone2End" : `number.${this.ld2410Name}_zone_2_end_distance`,
+                "zone3End" : `number.${this.ld2410Name}_zone_3_end_distance`,
                 "zone1occupancy" : `binary_sensor.${this.ld2410Name}_zone_1_occupancy`,
                 "zone2occupancy" : `binary_sensor.${this.ld2410Name}_zone_2_occupancy`,
                 "zone3occupancy" : `binary_sensor.${this.ld2410Name}_zone_3_occupancy`,
@@ -194,27 +213,26 @@ constructor() {
                   "gstill": `number.${this.ld2410Name}_g7_still_threshold`,
                   "gstillenergie": `sensor.${this.ld2410Name}_g7_still_energy`
                 }
-              }
             }
           };
           
 
 
                     
-          const pippoThreshold = devices[this.ld2410Name].gates.g3.gmove;
-          const deviceMap = devices[this.ld2410Name].gates;
-          const PrecenceSensorState = this.hass.states[devices[this.ld2410Name].precence_sensor]?.state;
-          const PrecenceSensor = devices[this.ld2410Name].precence_sensor;
-          const engeneerinMode = this.hass.states[devices[this.ld2410Name].engineering_mode]?.state; 
-          const movingDistantSensor: number = Number(this.hass.states[devices[this.ld2410Name].DetectionDistance]?.state);
-          const movingDistance: number = Number(this.hass.states[devices[this.ld2410Name].DetectionDistance]?.state);
-          const stillDistance: number = Number(this.hass.states[devices[this.ld2410Name].StillDistanceSensor]?.state);
+          const pippoThreshold = ld24xx.gates.g3.gmove;
+          const deviceMap = ld24xx.gates;
+          const PrecenceSensorState = this.hass.states[ld24xx.precence_sensor]?.state;
+          const PrecenceSensor = ld24xx.precence_sensor;
+          const engeneerinMode = this.hass.states[ld24xx.engineering_mode]?.state; 
+          const movingDistantSensor: number = Number(this.hass.states[ld24xx.DetectionDistance]?.state);
+          const movingDistance: number = Number(this.hass.states[ld24xx.DetectionDistance]?.state);
+          const stillDistance: number = Number(this.hass.states[ld24xx.StillDistanceSensor]?.state);
 
          
           
 
-            this.MovingDistanceNumber = this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state;
-            this.StillDistanceNumber = this.hass.states[devices[this.ld2410Name].still_distance_n_gates]?.state;
+            this.MovingDistanceNumber = this.hass.states[ld24xx.move_distance_n_gates]?.state;
+            this.StillDistanceNumber = this.hass.states[ld24xx.still_distance_n_gates]?.state;
 
             let distanzaArray;
             let calculatedPercentageMovingDistance;
@@ -222,54 +240,53 @@ constructor() {
             let calculateddistanceSensor;
             let distanceSvgMan;
             let distanceSvgManBar;
-            const valore: number = Number(this.hass.states[devices[this.ld2410Name].move_distance_n_gates]?.state)
+            const numGatesAttivi: number = Number(this.hass.states[ld24xx.move_distance_n_gates]?.state)
             var maxDistanza;
-            if (this.hass.states[devices[this.ld2410Name].distanceResolution]?.state === '0.75m') {
+            if (this.hass.states[ld24xx.distanceResolution]?.state === '0.75m') {
                 distanzaArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
-                // Verifica se il valore è un numero valido
-            if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
-                // Il valore è valido, imposta il massimo dell'input
-                maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+                // Verifica se il numGatesAttivi è un numero valido
+            if (!isNaN(numGatesAttivi) && numGatesAttivi >= 1 && numGatesAttivi <= distanzaArray.length) {
+                // Il numGatesAttivi è valido, imposta il massimo dell'input
+                maxDistanza = (parseFloat(distanzaArray[numGatesAttivi - 1].replace('m', '').replace(',', '.')) * 100);
 
                 
-            } else {
-                // Il valore non è valido, gestisci l'errore o fornisci un valore di default
-                console.error("Valore non valido");
             }
                 distanceSvgMan = (movingDistance / maxDistanza) * 410;
 
-                calculatedPercentageMovingDistance = (movingDistance / 600) * 88;
-                calculatedPercentageStillDistance = (stillDistance / 600) * 88;
-                calculateddistanceSensor = (movingDistantSensor / 600) * 88;
+                calculatedPercentageMovingDistance = (movingDistance / 600) * 100;
+                calculatedPercentageStillDistance = (stillDistance / 600) * 100;
+                calculateddistanceSensor = (movingDistantSensor / 600) * 100;
             } else {
                 distanzaArray = ["0.20m", "0.40m", "0.60m", "0.80m", "1.00m", "1.20m", "1.40m", "1.60m"];
-                if (!isNaN(valore) && valore >= 1 && valore <= distanzaArray.length) {
+                if (!isNaN(numGatesAttivi) && numGatesAttivi >= 1 && numGatesAttivi <= distanzaArray.length) {
                     // Il valore è valido, imposta il massimo dell'input
-                    maxDistanza = (parseFloat(distanzaArray[valore - 1].replace('m', '').replace(',', '.')) * 100);
+                    maxDistanza = (parseFloat(distanzaArray[numGatesAttivi - 1].replace('m', '').replace(',', '.')) * 100);
     
                     
-                } else {
-                    console.error("Valore non valido");
                 }
-                calculatedPercentageMovingDistance = (movingDistance / 160) * 88;
-                calculatedPercentageStillDistance = (movingDistance / 160) * 88;
-                calculateddistanceSensor = (movingDistantSensor / 160) * 88;
+                calculatedPercentageMovingDistance = (movingDistance / 160) * 100;
+                calculatedPercentageStillDistance = (movingDistance / 160) * 100;
+                calculateddistanceSensor = (movingDistantSensor / 160) * 100;
             }
-            const movingDistancePerc: number = Number(calculatedPercentageMovingDistance > 88 ? 88 : calculatedPercentageMovingDistance);
-            const stillDistancePerc: number = Number(calculatedPercentageStillDistance > 88 ? 88 : calculatedPercentageStillDistance);
-            const DistancePerc: number = Number(calculateddistanceSensor > 88 ? 88 : calculateddistanceSensor);
+            const movingDistancePerc: number = Number(calculatedPercentageMovingDistance > 100 ? 100 : calculatedPercentageMovingDistance);
+            const stillDistancePerc: number = Number(calculatedPercentageStillDistance > 100 ? 100 : calculatedPercentageStillDistance);
+            let zoneConfig;
             
-            const zone1 : number = Number(this.hass.states[devices[this.ld2410Name].zone1End]?.state)
-            const zone2 : number = Number(this.hass.states[devices[this.ld2410Name].zone2End]?.state)
+            if (this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]  ) {
+
+                zoneConfig = true;
+            } else {
+                zoneConfig = false;
+            }
+            
+            const zone1 : number = Number(this.hass.states[ld24xx.zone1End]?.state)
+            const zone2 : number = Number(this.hass.states[ld24xx.zone2End]?.state)
+            const zone3 : number = Number(this.hass.states[ld24xx.zone3End]?.state)
 
             
 
 
           return html`
-          ${this.hass.states[devices[this.ld2410Name].zone1occupancy]?.state}
-          ${this.hass.states[devices[this.ld2410Name].zone2occupancy]?.state}
-          ${this.hass.states[devices[this.ld2410Name].zone3occupancy]?.state}
-          ${distanceSvgMan}
             <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -303,7 +320,7 @@ constructor() {
                     </linearGradient>
                 <path class="hilink_button_overlay" d="M380.96,15.81h-82c-5.42,0-9.81,4.39-9.81,9.81v0c0,5.42,4.39,9.81,9.81,9.81h82c5.42,0,9.81-4.39,9.81-9.81v0
                     C390.77,20.2,386.38,15.81,380.96,15.81z"/>
-                <path @click=${() => this._moreinfo(devices[this.ld2410Name].precence_sensor)} style="fill:transparent; cursor:pointer" d="M380.5,46.15h-81c-9.11,0-16.5-7.39-16.5-16.5v0c0-9.11,7.39-16.5,16.5-16.5h81c9.11,0,16.5,7.39,16.5,16.5v0
+                <path @click=${() => this._moreinfo(ld24xx.precence_sensor)} style="fill:transparent; cursor:pointer" d="M380.5,46.15h-81c-9.11,0-16.5-7.39-16.5-16.5v0c0-9.11,7.39-16.5,16.5-16.5h81c9.11,0,16.5,7.39,16.5,16.5v0
                     C397,38.77,389.61,46.15,380.5,46.15z"/>
             </g>
             <g>
@@ -353,38 +370,56 @@ constructor() {
             </svg>
 
         <!-- #############################################################   fine header  ############################################################# -->
-        <!-- #############################################################     options    ############################################################# -->
+        <!-- #############################################################     select device    ############################################################# -->
 
             <div class="main-container">
                 <div style="display:flex;flex-direction:row;justify-content: center;align-items: center;font-size: large;"  >setup device:
                 ${this.getLD2410DeviceNameDropdown(this.config.devices_name)}
+                
+         <!-- #############################################################     options    ############################################################# -->
                 <div style="flex-grow:1"></div>
-                 <ha-icon class="option" style="cursor: pointer;" icon="${this._show_options === false ? 'mdi:cog-outline' : 'mdi:arrow-left-circle'}" @click="${() => { this._show_options = !this._show_options ; this._show_main = !this._show_main; }}"></ha-icon>
-                </div>
+                ${this._show_options === false ? html`
+                 <ha-icon class="ha-icon-option" style="cursor: pointer;" icon="mdi:cog-outline" @click="${() => { this._show_options = !this._show_options ; this._show_main = !this._show_main; }}"></ha-icon>
+                 ` : html` 
+                 <ha-icon class="ha-icon-option" style="cursor: pointer;" icon="mdi:arrow-left-circle" @click="${() => { this._show_options = !this._show_options ; this._show_main = !this._show_main; this.pushValue() }}"></ha-icon>
+
+                 `}
+                 </div>
                 <hr>
+                ${this.hass.states[`sensor.${this.ld2410Name}_ld2410_device_name`] && this.hass.states[`sensor.${this.ld2410Name}_ld2410_device_name`].state !== "unavailable" ? html`
                 ${this._show_options ? html`
                 <div class="select-options-container">
                     <div class="select-options-item">
                         <div class="option-select-title">Baud Rate</div>
-                        ${this.select_box(devices[this.ld2410Name].baudRate, this.hass.states[devices[this.ld2410Name].baudRate]?.attributes.options, this.hass.states[devices[this.ld2410Name].baudRate]?.state, )}
+                        ${this.select_box(ld24xx.baudRate, this.hass.states[ld24xx.baudRate]?.attributes.options, this.hass.states[ld24xx.baudRate]?.state, )}
                     </div>
 
                     <div class="select-options-item">
                         <div class="option-select-title">Out Pin Level</div>
-                        ${this.select_box(devices[this.ld2410Name].outPinLevel, this.hass.states[devices[this.ld2410Name].outPinLevel]?.attributes.options, this.hass.states[devices[this.ld2410Name].outPinLevel]?.state, )}
+                        ${this.select_box(ld24xx.outPinLevel, this.hass.states[ld24xx.outPinLevel]?.attributes.options, this.hass.states[ld24xx.outPinLevel]?.state, )}
                     </div>
                 </div>
                 <div class="select-options-container">
                     <div class="select-options-item">
                         <div class="option-select-title">Light Function</div>
-                        ${this.select_box(devices[this.ld2410Name].lightFunction, this.hass.states[devices[this.ld2410Name].lightFunction]?.attributes.options, this.hass.states[devices[this.ld2410Name].lightFunction]?.state, )}
+                        ${this.select_box(ld24xx.lightFunction, this.hass.states[ld24xx.lightFunction]?.attributes.options, this.hass.states[ld24xx.lightFunction]?.state, )}
+                        
+                    
                     </div>
                     <div class="select-options-item">
                         <div class="option-select-title">Distance Resolution</div>
-                        ${this.select_box(devices[this.ld2410Name].distanceResolution, this.hass.states[devices[this.ld2410Name].distanceResolution]?.attributes.options, this.hass.states[devices[this.ld2410Name].distanceResolution]?.state, )}
+                        <select class="options-select" name="entity" id="entity"  .value="${this.hass.states[ld24xx.distanceResolution]?.state}"
+                        
+                          @change=${(e) => this._callserviceSelectResolution(ld24xx.distanceResolution, 'select', "select_option", e.target.value, ld24xx.zone1End, ld24xx.zone2End, ld24xx.zone3End, numGatesAttivi, distanzaArray )}>
+                          ${this.hass.states[ld24xx.distanceResolution]?.attributes.options ? 
+                            this.hass.states[ld24xx.distanceResolution]?.attributes.options.map((attr) => html`
+                              <option value="${attr}" ?selected="${attr === this.hass.states[ld24xx.distanceResolution]?.state}">${attr}</option>
+                            `) : ''}
+                        </select>
+                    
                     </div>
                 </div>
-                    ${this.hass.states[devices[this.ld2410Name].lightFunction]?.state != 'off' ? html` 
+                    ${this.hass.states[ld24xx.lightFunction]?.state != 'off' ? html` 
                     <div class="lux-container-top">
                         <div style="flex-grow: 1;padding-left: 1em;">lux treshold</div>
                         <div class="lux-center-item">sensor:</div>
@@ -396,74 +431,74 @@ constructor() {
                             id="lux_treshold" 
                             min="0" 
                             max="255" 
-                            .value="${this.hass.states[devices[this.ld2410Name].lightTreshold]?.state}"  
+                            .value="${this.hass.states[ld24xx.lightTreshold]?.state}"  
                             @input=${this.onRangeInputMove} 
-                            @change=${e => this._setNumber_direct(devices[this.ld2410Name].lightTreshold, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
-                        <div class="lux-center-item">${this.hass.states[devices[this.ld2410Name].lightTreshold]?.state}</div>
-                        <div class="lux-center-item">${engeneerinMode === 'on' ? this.hass.states[devices[this.ld2410Name].lightSensor]?.state : 'eng off' }</div>
+                            @change=${e => this._setNumber_direct(ld24xx.lightTreshold, ld24xx.engineering_mode, e.target.value)}> 
+                        <div class="lux-center-item">${this.hass.states[ld24xx.lightTreshold]?.state}</div>
+                        <div class="lux-center-item">${engeneerinMode === 'on' ? this.hass.states[ld24xx.lightSensor]?.state : 'eng off' }</div>
                     </div>
                     ` : html`
                     `}
                 <div class="options-container">
                     <div class="options-left">
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].firmwareUpgrade)}>Firmware:</div>
-                            <div>${this.hass.states[devices[this.ld2410Name].firmwareUpgrade]?.state === 'on' ? 'update available' : 'updated'}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.firmwareUpgrade)}>Firmware:</div>
+                            <div>${this.hass.states[ld24xx.firmwareUpgrade]?.state === 'on' ? 'update available' : 'updated'}</div>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].firmwareVersion)}>Firmware ver.:</div>
-                            <div>${this.hass.states[devices[this.ld2410Name].firmwareVersion]?.state}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.firmwareVersion)}>Firmware ver.:</div>
+                            <div>${this.hass.states[ld24xx.firmwareVersion]?.state}</div>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].macAddress)}>Mac address:</div>
-                            <div>${this.hass.states[devices[this.ld2410Name].macAddress]?.state}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.macAddress)}>Mac address:</div>
+                            <div>${this.hass.states[ld24xx.macAddress]?.state}</div>
                         </div>
                     </div>
                     <div class="options-right">
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].presenceLed)}>${this.hass.states[devices[this.ld2410Name].presenceLed]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.presenceLed)}>${this.hass.states[ld24xx.presenceLed]?.attributes.friendly_name}</div>
                             <ha-switch 
-                            .checked="${this.hass.states[devices[this.ld2410Name].presenceLed]?.state === 'on' ? true : false}"
-                                @click="${() => this._callservice(devices[this.ld2410Name].presenceLed, 'switch', 'toggle')}"
+                            .checked="${this.hass.states[ld24xx.presenceLed]?.state === 'on' ? true : false}"
+                                @click="${() => this._callservice(ld24xx.presenceLed, 'switch', 'toggle')}"
                             ></ha-switch>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].greenStatuLed)}>${this.hass.states[devices[this.ld2410Name].greenStatuLed]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.greenStatuLed)}>${this.hass.states[ld24xx.greenStatuLed]?.attributes.friendly_name}</div>
                             <ha-switch 
-                            .checked="${this.hass.states[devices[this.ld2410Name].greenStatuLed]?.state === 'on' ? true : false}"
-                                @click="${() => this._callservice(devices[this.ld2410Name].greenStatuLed, 'light', 'toggle')}"
+                            .checked="${this.hass.states[ld24xx.greenStatuLed]?.state === 'on' ? true : false}"
+                                @click="${() => this._callservice(ld24xx.greenStatuLed, 'light', 'toggle')}"
                             ></ha-switch>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].bluetooth)}>${this.hass.states[devices[this.ld2410Name].bluetooth]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.bluetooth)}>${this.hass.states[ld24xx.bluetooth]?.attributes.friendly_name}</div>
                             <ha-switch 
-                            .checked="${this.hass.states[devices[this.ld2410Name].bluetooth]?.state === 'on' ? true : false}"
-                                @click="${() => this._callservice(devices[this.ld2410Name].bluetooth, 'switch', 'toggle')}"
+                            .checked="${this.hass.states[ld24xx.bluetooth]?.state === 'on' ? true : false}"
+                                @click="${() => this._callservice(ld24xx.bluetooth, 'switch', 'toggle')}"
                             ></ha-switch>
                         </div>
                     </div>
                 </div>
                 <hr>
                 <div class="reset">
-                    <div class="grid-item-reset" @click="${() => this._callservice(devices[this.ld2410Name].rebootEsp, 'button', 'press')}">
+                    <div class="grid-item-reset" @click="${() => this._callservice(ld24xx.rebootEsp, 'button', 'press')}">
                         <div class="grid-item-content">
                             <ha-icon icon="mdi:power-cycle" ></ha-icon>  
                             <div style="flex-grow:1;margin-left: 6%;color: var(--state-icon-color);">ESP reboot</div>
                         </div>
                     </div>
-                    <div class="grid-item-reset" @click="${() => this._callservice(devices[this.ld2410Name].restart, 'button', 'press')}">
+                    <div class="grid-item-reset" @click="${() => this._callservice(ld24xx.restart, 'button', 'press')}">
                         <div class="grid-item-content">
                             <ha-icon icon="mdi:restart" ></ha-icon>  
                             <div style="flex-grow:1;margin-left: 6%;color: var(--state-icon-color);">LD Restart</div>
                         </div>
                     </div>
-                    <div class="grid-item-reset" @click="${() => this._callservice(devices[this.ld2410Name].factoryRest, 'button', 'press')}">
+                    <div class="grid-item-reset" @click="${() => this._callservice(ld24xx.factoryRest, 'button', 'press')}">
                         <div class="grid-item-content">
                             <ha-icon icon="mdi:restart-alert" ></ha-icon>  
                             <div style="flex-grow:1;margin-left: 6%;color: var(--state-icon-color);">Factory reset</div>
                         </div>
                     </div>
-                    <div class="grid-item-reset" @click="${() => this._callservice(devices[this.ld2410Name].queryParams, 'button', 'press')}">
+                    <div class="grid-item-reset" @click="${() => this._callservice(ld24xx.queryParams, 'button', 'press')}">
                         <div class="grid-item-content">
                             <ha-icon icon="mdi:database" ></ha-icon>  
                             <div style="flex-grow:1;margin-left: 6%;color: var(--state-icon-color);">Query params</div>
@@ -489,29 +524,29 @@ constructor() {
         <div class="info-container">
                     <div class="info-item">
                         <div class="info-item-title">Timeout</div>
-                        <input class="div-timeout"  type="number" id="timeout" name="timeout" min="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.min}" max="${this.hass.states[devices[this.ld2410Name].timeOut]?.attributes.max}" .value="${this.hass.states[devices[this.ld2410Name].timeOut]?.state}"  @change=${e => this._setNumber_direct(devices[this.ld2410Name].timeOut, null, e.target.value)}>
+                        <input class="div-timeout"  type="number" id="timeout" name="timeout" min="${this.hass.states[ld24xx.timeOut]?.attributes.min}" max="${this.hass.states[ld24xx.timeOut]?.attributes.max}" .value="${this.hass.states[ld24xx.timeOut]?.state}"  @change=${e => this._setNumber_direct(ld24xx.timeOut, null, e.target.value)}>
                     </div>
 
-                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].outPinStatus)}>
+                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(ld24xx.outPinStatus)}>
                         <div class="info-item-title">Out Pin </div>
-                        <div class="info-value">${this.hass.states[devices[this.ld2410Name].outPinStatus]?.state}</div>
+                        <div class="info-value">${this.hass.states[ld24xx.outPinStatus]?.state}</div>
                     </div>
-                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].DetectionDistance)}>
+                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(ld24xx.DetectionDistance)}>
                         <div class="info-item-title">Distance</div>
-                        <div class="info-value">${this.hass.states[devices[this.ld2410Name].DetectionDistance]?.state}</div>
+                        <div class="info-value">${this.hass.states[ld24xx.DetectionDistance]?.state}</div>
                     </div>
-                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].DistanceMoveDistance)}>
+                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(ld24xx.DistanceMoveDistance)}>
                         <div class="info-item-title">Move</div>
-                        <div class="info-value">${this.hass.states[devices[this.ld2410Name].DistanceMoveDistance]?.state}</div>
+                        <div class="info-value">${this.hass.states[ld24xx.DistanceMoveDistance]?.state}</div>
                     </div>
-                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].DistanceStillDistance)}>
+                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(ld24xx.DistanceStillDistance)}>
                         <div class="info-item-title">Still</div>
-                        <div class="info-value">${this.hass.states[devices[this.ld2410Name].DistanceStillDistance]?.state}</div>
+                        <div class="info-value">${this.hass.states[ld24xx.DistanceStillDistance]?.state}</div>
                     </div>
-                    ${devices[this.ld2410Name].externalLightSensor ? html`
-                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(devices[this.ld2410Name].externalLightSensor)}>
+                    ${ld24xx.externalLightSensor ? html`
+                    <div class="info-item" style="cursor:pointer;" @click=${() => this._moreinfo(ld24xx.externalLightSensor)}>
                         <div class="info-item-title">Lux</div>
-                        <div class="info-value" >${this.hass.states[devices[this.ld2410Name].externalLightSensor]?.state}</div>
+                        <div class="info-value" >${this.hass.states[ld24xx.externalLightSensor]?.state}</div>
                     </div>
                     ` : html` `}
                 </div>
@@ -519,7 +554,7 @@ constructor() {
     <!-- ###################################### indicatore ######################################### --> 
 
                 <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                        viewBox="0 0 450.6 130" style="enable-background:new 0 0 450.6 130;" xml:space="preserve">
+                        viewBox="0 0 450.6 ${zoneConfig ? '130' : '89'}" style="enable-background:new 0 0 450.6 130;" xml:space="preserve">
                 <style type="text/css">
                     .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
                     .primary_color{fill:var(--primary-color);}
@@ -598,180 +633,47 @@ constructor() {
                         </g>
                     </g>
                 </g>
-                <foreignobject transform="matrix(1 0 0 1 0 34)"    width="445" height="100">
+                <foreignobject transform="matrix(1 0 0 1 0 29)"    width="445" height="100">
+                ${zoneConfig ? html`
+                <div slider id="slider-distance">
+                <div>
+                    <div id="zona1occupancy" inverse-left style="width:${(zone1 / maxDistanza) * 100}%;${this.hass.states[ld24xx.zone1occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                    <div id="zona4occupancy" inverse-right style="width:${(100 - (zone3 / maxDistanza) * 100)}%;background-color: grey;"></div>
+                    <div id="zona2occupancy" range style="left:${(zone1 / maxDistanza) * 100}%;right:${(((zone2 / maxDistanza) * 100) - 100) * - 1 }%;${this.hass.states[ld24xx.zone2occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                    <div id="zona3occupancy" range style="left:${(zone2 / maxDistanza) * 100}%;right:${(((zone3 / maxDistanza) * 100) - 100) * - 1 }%;${this.hass.states[ld24xx.zone3occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
+                    <span thumb id="thumb1" style="left:${(zone1 / maxDistanza) * 100}%;"></span>
+                    <span thumb id="thumb2" style="left:${(zone2/ maxDistanza) * 100}%;"></span>
+                    <span thumb id="thumb3" style="left:${(zone3/ maxDistanza) * 100}%;"></span>
+                    <div sign id="spanZone1" sign style="left:${(zone1 / maxDistanza) * 100}%;">
+                        <span id="valueZone1"></span>
+                    </div>
+                    <div sign id="spanZone2" sign style="left:${(zone2 / maxDistanza) * 100}%;">
+                        <span id="valueZone2"></span>
+                    </div>
+                    <div id="spanZone3" sign style="left:${(zone3 / maxDistanza) * 100}%;">
+                        <span id="valueZone3"></span>
+                    </div>
+                </div>
+                <input type="range" min="1" max="${maxDistanza}" value="${zone1}"  id="zone1" @input=${(e) => this.handleZone1Change(e)} @change=${e => this._setNumber_zone(ld24xx.zone1End, e.target.value)}/>
+                <input type="range" min="1" max="${maxDistanza}" value="${zone2}"  id="zone2" @input=${(e) => this.handleZone2Change(e)} @change=${e => this._setNumber_zone(ld24xx.zone2End, e.target.value)}/>
+                <input type="range" min="1" max="${maxDistanza}" value="${zone3}"  id="zone3" @input=${(e) => this.handleZone3Change(e)} @change=${e => this._setNumber_zone(ld24xx.zone3End, e.target.value)}/>
+            </div>
 
-                        <div slider id="slider-distance">
-                            <div>
-                            <div inverse-left style="width:${(zone1 / maxDistanza) * 100}%;${this.hass.states[devices[this.ld2410Name].zone1occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
-                            <div inverse-right style="width:${(100 - (zone2 / maxDistanza) * 100)}%;${this.hass.states[devices[this.ld2410Name].zone3occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
-                            <div range style="left:${(zone1 / maxDistanza) * 100}%;right:${(((zone2 / maxDistanza) * 100) - 100) * - 1 }%;${this.hass.states[devices[this.ld2410Name].zone2occupancy]?.state === 'on' ? 'background-color: red' : ''}"></div>
-                            <span thumb style="left:${(zone1 / maxDistanza) * 100}%;"></span>
-                            <span thumb style="left:${(zone2/ maxDistanza) * 100}%;"></span>
-                            <div sign style="left:${(zone1 / maxDistanza) * 100}%;">
-                                ${zone1}
-                            </div>
-                            <div sign style="left:${(zone2 / maxDistanza) * 100}%;">
-                                ${zone2}
-                            </div>
-                            </div>
-                            <input type="range" tabindex="0" value="${zone1}" max="${maxDistanza || 600}" min="0" step="1" oninput="
-                            this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
-                            var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
-                            var children = this.parentNode.childNodes[1].childNodes;
-
-                            children[1].style.width=value+'%';
-                            children[3].style.width=((value - 100) * -1)+'%';
-                            children[5].style.left=value+'%';
-                            children[7].style.left=value+'%';children[11].style.left=value+'%';
-                            children[11].childNodes[1].innerHTML=this.value;" @change=${e => this._setNumber_zone(devices[this.ld2410Name].zone1End, e.target.value)}/>
-                        
-                            <input type="range" tabindex="0" value="${zone2}" max="${maxDistanza || 600}" min="0" step="1"  @change=${e => this._setNumber_zone(devices[this.ld2410Name].zone2End, e.target.value)} oninput="
-                            this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
-                            var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
-
-                            var children = this.parentNode.childNodes[1].childNodes;
-                            children[3].style.width=(100-value)+'%';
-                            children[5].style.right=(100-value)+'%';
-                            children[9].style.left=value+'%';children[13].style.left=value+'%';
-                            children[13].childNodes[1].innerHTML=this.value;" />
-                        </div>
-
+            ` : ``}
                 </foreignobject>
                 </svg>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--                <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 450.6 76.4" style="enable-background:new 0 0 450.6 76.4;" xml:space="preserve">
-<style type="text/css">
-    .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
-    .meter-principale-testo{fill:var(--primary-text-color);font-size:10px;}
-    .meter-principale-shepe{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-    c
-</style>
-<rect id="rettangolo_x5F_ruler" y="58.5" class="meter-principale-rettangolo" width="450.6" height="17.9"/>
-<g id="misure">
-
-		<text id="gate-1-text_00000016071961384992556670000012793053045481635972_" transform="matrix(1.0488 0 0 1 9.7402 71.4121)" class="meter-principale-testo">0</text>
-	<path class="meter-principale-shepe" d="M16.1,67h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
-	<text id="gate-1-text" transform="matrix(1.0488 0 0 1 35.7798 71.4125)" class="meter-principale-testo">0,75m</text>
-	<path class="meter-principale-shepe" d="M67.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 85.7788 71.4125)" class="meter-principale-testo">1,50m</text>
-	<path class="meter-principale-shepe" d="M117.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 135.7778 71.4125)" class="meter-principale-testo">2,25m</text>
-	<path class="meter-principale-shepe" d="M167.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 185.7788 71.4125)" class="meter-principale-testo">3,00m</text>
-	<path class="meter-principale-shepe" d="M217.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 235.7788 71.4125)" class="meter-principale-testo">3,75m</text>
-	<path class="meter-principale-shepe" d="M267.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 285.7798 71.4125)" class="meter-principale-testo">4,50m</text>
-	<path class="meter-principale-shepe" d="M317.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 335.7778 71.4125)" class="meter-principale-testo">5,25m</text>
-	<path class="meter-principale-shepe" d="M367.1,67.4h6.7c1,0,1.7-0.8,1.7-1.7V59"/>
-	
-		<text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 385.7769 71.9974)" class="meter-principale-testo">6,00m</text>
-	<path class="meter-principale-shepe" d="M417.1,68h6.7c1,0,1.7-0.8,1.7-1.7v-6.7"/>
-</g>
-<foreignobject transform="matrix(1 0 0 1 410 14)"    width="12" height="45">
-<svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve">
-<g id="man">
-<path class="primary_color" d="M6,9.7c0.6,0,1.4,0,2.5,0c2.4,0,3.5,3.1,3.5,4.6c0,3.3,0,6.8,0,11.7c0,1.5-1.5,0.6-1.7,1.9
-   C9.7,33.4,9.8,37.4,9,41.6c-0.1,0.6-0.7,1.6-2.3,1.6L6,44.9h0l-0.7-1.7c-1.7,0-2.2-1-2.3-1.6c-0.7-4.1-0.6-8.1-1.3-13.7
-   C1.5,26.6,0,27.5,0,26c0-4.9,0-8.4,0-11.7c0-1.6,1.1-4.6,3.5-4.6C4.5,9.7,5.4,9.7,6,9.7"/>
-<ellipse class="primary_color" cx="6" cy="4.7" rx="4.1" ry="4.1"/>
-</g>
-</svg>
-                </foreignobject>
-
-<g id="radar">
-
-		<g id="layer1_00000146494627415306622150000013077120801947842442_" transform="translate(0,-740.55109)">
-			<path id="path4391_00000110451651967434578370000004409614462899860382_" class="primary_color" d="M15.5,756.4c2.5-2.4,4-5.7,4.2-9.3
-				l-3.3,0c-0.2,5.5-4.7,9.8-10.2,9.8L6,760.2C9.7,760.2,13,758.7,15.5,756.4L15.5,756.4z M16.3,747L16.3,747L16.3,747z"/>
-			<path id="path4395_00000080204113281266067360000004423022825113158022_" class="primary_color" d="M18.9,760c3.4-3.3,5.6-7.8,5.7-12.8
-				l-3.3,0c-0.3,8.2-7.1,14.8-15.3,14.8l-0.1,3.4C11,765.3,15.6,763.3,18.9,760L18.9,760z M20,764.8L20,764.8L20,764.8z"/>
-			<path id="path4381_00000158728040944148855660000011473676464589785535_" class="primary_color" d="M12,752.8c1.5-1.5,2.5-3.5,2.6-5.8
-				l-3.2,0c-0.1,2.8-2.4,5-5.2,5l-0.1,3.2C8.4,755.2,10.5,754.2,12,752.8L12,752.8z M11.4,746.9L11.4,746.9L11.4,746.9z"/>
-			<path id="path4411_00000083770962395965472580000005466728432597625011_" class="primary_color" d="M6.4,743.5c1.8,0,3.3,1.6,3.3,3.4
-				c0,1.8-1.6,3.3-3.4,3.3c-1.8,0-3.3-1.6-3.3-3.4C3,745,4.5,743.5,6.4,743.5l-0.1,3.3L6.4,743.5z"/>
-		</g>
-
-</g>
-</svg>
-
-
-                
-
-                </div>
       
-
-
-            <div slider id="slider-distance">
-                <div>
-                <div inverse-left style="width:${(zone1 /600) * 100}%;"></div>
-                <div inverse-right style="width:${(zone2 /600) * 100}%;"></div>
-                <div range style="left:${(zone1 /600) * 100}%;right:${(((zone2 /600) * 100) - 100) * - 1 }%;"></div>
-                <span thumb style="left:${(zone1 /600) * 100}%;"></span>
-                <span thumb style="left:${(zone2/600) * 100}%;"></span>
-                <div sign style="left:${(zone1 /600) * 100}%;">
-                    <span id="value">${zone1}</span>
-                </div>
-                <div sign style="left:${(zone2 /600) * 100}%;">
-                    <span id="value">${zone2}</span>
-                </div>
-                </div>
-                <input type="range" tabindex="0" value="${zone1}" max="600" min="0" step="1" oninput="
-                this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
-                var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
-                var children = this.parentNode.childNodes[1].childNodes;
-                children[1].style.width=value+'%';
-                children[3].style.width=((value - 100) * -1)+'%';
-                children[5].style.left=value+'%';
-                children[7].style.left=value+'%';children[11].style.left=value+'%';
-                children[11].childNodes[1].innerHTML=this.value;" />
-            
-                <input type="range" tabindex="0" value="${zone2}" max="600" min="0" step="1" oninput="
-                this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
-                var value=(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.value)-(100/(parseInt(this.max)-parseInt(this.min)))*parseInt(this.min);
-                console.log(value);
-                var children = this.parentNode.childNodes[1].childNodes;
-                children[3].style.width=(100-value)+'%';
-                children[5].style.right=(100-value)+'%';
-                children[9].style.left=value+'%';children[13].style.left=value+'%';
-                children[13].childNodes[1].innerHTML=this.value;" />
-            </div>   -->             
 
                 `}
 
             <hr>
 
-            <a  class="cta ${this.hass.states[devices[this.ld2410Name].engineering_mode]?.state === 'on' ? 'cta-active' : ' ' }"  @click="${() => this._callservice(devices[this.ld2410Name].engineering_mode, 'switch', 'toggle')}">
-            <ha-icon icon="mdi:power-cycle" style="padding-left: 3px;color: var(--card-background-color);"  ></ha-icon style="margin: 0 10px 0 10px" >  <span>Engineering mode ${this.hass.states[devices[this.ld2410Name].engineering_mode]?.state}</span>
+            <a  class="cta ${this.hass.states[ld24xx.engineering_mode]?.state === 'on' ? 'cta-active' : ' ' }"  @click="${() => this._callservice(ld24xx.engineering_mode, 'switch', 'toggle')}">
+            <ha-icon icon="mdi:power-cycle" style="padding-left: 3px;color: var(--card-background-color);"  ></ha-icon style="margin: 0 10px 0 10px" >  <span>Engineering mode ${this.hass.states[ld24xx.engineering_mode]?.state}</span>
             </a>
 
-            ${this.hass.states[devices[this.ld2410Name].engineering_mode]?.state === 'on' ? html`
+            ${this.hass.states[ld24xx.engineering_mode]?.state === 'on' ? html`
             <div style="display: flex;justify-content:space-between;margin-top: 10px;" >
             <a  class="cta ${this._show_gmove == true && this._show_gstill == false ? 'cta-active' : ' ' }" @click=${() => {
                     this._show_gmove = true;
@@ -807,9 +709,6 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             const GMoveState = parseInt(GMoveStates?.state) || 0;
             const gMoveEnergieStates = this.hass.states[gate.gmoveenergie];
             const gMoveEnergieState = parseInt(gMoveEnergieStates?.state) || 0;
-            //   console.log(gate.gmove);
-
-
             return gMove ? html`
             <div class="inner-gates-container">
                 ${this.MovingDistanceNumber >= index + 1 ? html`
@@ -849,7 +748,7 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             max="8" 
             .value="${this.MovingDistanceNumber}"  
             @input=${this.onRangeInputMove} 
-            @change=${e => this._setNumber_direct_move(devices[this.ld2410Name].move_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
+            @change=${e => this._setNumber_direct_move(ld24xx.move_distance_n_gates, ld24xx.engineering_mode, e.target.value, ld24xx.zone1End, ld24xx.zone2End, ld24xx.zone3End)}> 
 
             
             
@@ -858,14 +757,6 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             
             <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
             viewBox="0 0 400 32" style="enable-background:new 0 0 400 32;" xml:space="preserve">
-            <style type="text/css">
-                .st0{fill:var(--divider-color)}
-                .st1{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-                .st2{fill:var(--primary-text-color);}
-                .st3{font-family:'Arial-BoldMT';}
-                .st4{font-size:10px;}
-                .st5{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-            </style>
             <g id="gruppo-ruler">
                 <foreignobject transform="matrix(1 0 0 1 -1 13.75)"    width="402" height="18">
                     <div class="ruler-meter-div">
@@ -951,9 +842,6 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             const GStillState = parseInt(GStillStates?.state) || 0;
             const gStillEnergieStates = this.hass.states[gate.gstillenergie];
             const gStillEnergieState = parseInt(gStillEnergieStates?.state) || 0;
-            //   console.log(gate.gmove);
-
-
             return gStill ? html`
             <div class="inner-gates-container">
                 ${this.StillDistanceNumber >= index + 1 ? html`
@@ -993,7 +881,7 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             max="8" 
             .value="${this.StillDistanceNumber}"  
             @input=${this.onRangeInputStill} 
-            @change=${e => this._setNumber_direct_still(devices[this.ld2410Name].still_distance_n_gates, devices[this.ld2410Name].engineering_mode, e.target.value)}> 
+            @change=${e => this._setNumber_direct_still(ld24xx.still_distance_n_gates, ld24xx.engineering_mode, e.target.value)}> 
 
             
             
@@ -1002,14 +890,6 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             
             <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
             viewBox="0 0 400 32" style="enable-background:new 0 0 400 32;" xml:space="preserve">
-            <style type="text/css">
-                .st0{fill:var(--divider-color)}
-                .st1{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-                .st2{fill:var(--primary-text-color);}
-                .st3{font-family:'Arial-BoldMT';}
-                .st4{font-size:10px;}
-                .st5{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
-            </style>
             <g id="gruppo-ruler">
                 <foreignobject transform="matrix(1 0 0 1 -1 13.75)"    width="402" height="18">
                     <div class="ruler-meter-div">
@@ -1086,7 +966,13 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
 
         ` : html` `} 
         <!-- fine blocco engineering mode -->
-          
+        ` : html`
+            <div class="unavailable">
+                <ha-icon class="ha-icon-alert" icon="mdi:alert-outline" ></ha-icon>
+                <div >this device is anavailable</div>
+                <ha-icon class="ha-icon-alert" icon="mdi:alert-outline" ></ha-icon>
+            </div>
+        `} 
             </ha-card>
 `;
     }
@@ -1116,7 +1002,6 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         this.hass.callService(platform, command, {
             entity_id: entity_id 
         });
-        console.log(entity_id)
     }
 
     _callserviceSelect(entity_id, platform, command, value) {
@@ -1124,7 +1009,43 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             entity_id: entity_id,
             option: value 
         });
-        console.log(entity_id)
+    }
+
+    _callserviceSelectResolution(entity_id, platform, command, value, number1, number2, number3, numGates, distArray) {
+
+        
+        // Mostro un messaggio di conferma all'utente
+        const userConfirmation = confirm("when changing resolution the three additional zones are set to default values: zone1 0-33% zone2 33-66% zone3 66-100%. Do you want to continue?");
+        let maxdistanza;
+        // valore invertito 0.75m e 0.2m per ottenere stato corretto
+        if (this.hass.states[entity_id]?.state === '0.2m') {
+            distArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
+            if (!isNaN(numGates) && numGates >= 1 && numGates <= distArray.length) {
+                maxdistanza = (parseFloat(distArray[numGates - 1].replace('m', '').replace(',', '.')) * 100);
+            } 
+        } else {
+            distArray = ["0.20m", "0.40m", "0.60m", "0.80m", "1.00m", "1.20m", "1.40m", "1.60m"];
+            if (!isNaN(numGates) && numGates >= 1 && numGates <= distArray.length) {
+                // Il valore è valido, imposta il massimo dell'input
+                maxdistanza = (parseFloat(distArray[numGates - 1].replace('m', '').replace(',', '.')) * 100);
+            }
+        }
+            
+        
+        // Se l'utente ha confermato, procedi con l'esecuzione
+        if (userConfirmation) {
+            this.hass.callService(platform, command, {
+                entity_id: entity_id,
+                option: value 
+            });
+
+                this._setNumber_zone(number1, Math.round((maxdistanza * 33) / 100));
+                this._setNumber_zone(number2, Math.round((maxdistanza * 66) / 100));
+                this._setNumber_zone(number3, maxdistanza);
+
+        }
+        if (this.hass.states[entity_id]?.state === '0.2m') {
+        }
     }
 
 
@@ -1162,7 +1083,7 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         }, 2000); // 2000 millisecondi equivalgono a 2 secondi
     }
       
-      _setNumber_direct_move(entity_id, engineering_switch, value) {
+      _setNumber_direct_move(entity_id, engineering_switch, value, number1, number2, number3) {
         // Assicurati che il valore non sia inferiore a 2
         const newValue = Math.max(2, parseFloat(value));
     
@@ -1179,9 +1100,29 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
             entity_id: entity_id,
             value: newValue
         });
-    
-        // Richiedi un aggiornamento del componente
         this.requestUpdate();
+        this.updateComplete.then(() => {
+        let maxdistanza;
+        let distArray;
+        // valore invertito 0.75m e 0.2m per ottenere stato corretto
+        if (this.hass.states[`select.${this.ld2410Name}_distance_resolution`]?.state === '0.75m') {
+            distArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
+            if (!isNaN(value) && value >= 1 && value <= distArray.length) {
+                maxdistanza = (parseFloat(distArray[value - 1].replace('m', '').replace(',', '.')) * 100);
+            } 
+        } else {
+            distArray = ["0.20m", "0.40m", "0.60m", "0.80m", "1.00m", "1.20m", "1.40m", "1.60m"];
+            if (!isNaN(value) && value >= 1 && value <= distArray.length) {
+                // Il valore è valido, imposta il massimo dell'input
+                maxdistanza = (parseFloat(distArray[value - 1].replace('m', '').replace(',', '.')) * 100);
+            }
+        }
+        this._setNumber_zone(number1, Math.round((maxdistanza * 33) / 100));
+        this._setNumber_zone(number2, Math.round((maxdistanza * 66) / 100));
+        this._setNumber_zone(number3, maxdistanza);
+        });
+        // Richiedi un aggiornamento del componente
+        
     
         // Inserimento di un ritardo di 2 secondi prima della successiva chiamata di servizio
         setTimeout(() => {
@@ -1220,56 +1161,96 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         }, 2000); // 2000 millisecondi equivalgono a 2 secondi
     }
 
-
-    //   firstUpdated() {
-    //     // Ottenere il riferimento all'elemento input range
-    //     const rangeInput = this.shadowRoot.getElementById('myRange') as HTMLInputElement;
-
-    //     // Aggiungi un listener per controllare il valore quando viene modificato
-    //     rangeInput.addEventListener('input', () => {
-    //         // Controlla se il valore è inferiore a 1 e, se sì, imposta il valore a 1
-    //         if (parseInt(rangeInput.value) < 1) {
-    //             rangeInput.value = '1';
-    //         }
-    //     });
-    // }
-    firstUpdated() {
-        // Ottenere il riferimento all'elemento select
-        const selectElement = this.shadowRoot.getElementById('device_name') as HTMLSelectElement;
+    handleZone1Change(event: Event) {
+        const zone1Input = event.target as HTMLInputElement;
+        const zone2Input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
+        const zone1spanLeft = this.shadowRoot.getElementById('spanZone1');
+        const thumb1 = this.shadowRoot.getElementById('thumb1');
+        const occupancy1 = this.shadowRoot.getElementById('zona1occupancy');
+        const occupancy2 = this.shadowRoot.getElementById('zona2occupancy');
     
-        // Imposta il valore di default di this.ld2410Name al valore selezionato dell'elemento select
-        this.ld2410Name = selectElement.value;
+        // Assicura che zone1 non sia più grande di zone2
+        if (parseInt(zone1Input.value) > parseInt(zone2Input.value)) {
+            zone1Input.value = (parseInt(zone2Input.value) - 1).toString();
+        }
     
-        // // Ottenere il riferimento all'elemento input range per il movimento
-        // const rangeInputMove = this.shadowRoot.getElementById('n_move') as HTMLInputElement;
-        
-    
-        // // Aggiungi un listener per controllare il valore quando viene modificato
-        // rangeInputMove.addEventListener('input', () => {
-        //     // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
-        //     if (parseInt(rangeInputMove.value) < 2) {
-        //         rangeInputMove.value = '2';
-        //     }
-        //     // console.log(rangeInputMove.value);
-        // });
-    
-        // // Ottenere il riferimento all'elemento input range per la posizione ferma (still)
-        // const rangeInputStill = this.shadowRoot.getElementById('n_still') as HTMLInputElement;
-    
-        // // Aggiungi un listener per controllare il valore quando viene modificato
-        // rangeInputStill.addEventListener('input', () => {
-        //     // Controlla se il valore è inferiore a 2 e, se sì, imposta il valore a 2
-        //     if (parseInt(rangeInputStill.value) < 2) {
-        //         rangeInputStill.value = '2';
-        //     }
-        //     // console.log(rangeInputStill.value);
-        // });
+        const newvalue = (100 / (parseInt(zone1Input.max) - parseInt(zone1Input.min))) * parseInt(zone1Input.value) - (100 / (parseInt(zone1Input.max) - parseInt(zone1Input.min))) * parseInt(zone1Input.min);
+        zone1spanLeft.style.left = newvalue + '%';
+        thumb1.style.left = newvalue + '%';
+        occupancy1.style.width = newvalue + '%';
+        occupancy2.style.left = newvalue + '%';
+        const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
+        valueZone1Element.innerText = zone1Input.value;
     }
+
+    handleZone2Change(event: Event) {
+        const zone2Input = event.target as HTMLInputElement;
+        const zone1Input = this.shadowRoot.getElementById('zone1') as HTMLInputElement;
+        const zone3Input = this.shadowRoot.getElementById('zone3') as HTMLInputElement;
+        const value2span = this.shadowRoot.getElementById('valueZone2')
+        const zone2spanLeft = this.shadowRoot.getElementById('spanZone2')
+        const thumb2 = this.shadowRoot.getElementById('thumb2')
+        const occupancy2 = this.shadowRoot.getElementById('zona2occupancy')
+        const occupancy3 = this.shadowRoot.getElementById('zona3occupancy')
+        // Assicura che zone2 non sia più piccolo di zone1 e più grande di zone3
+        if (parseInt(zone2Input.value) < parseInt(zone1Input.value)) {
+            zone2Input.value = (parseInt(zone1Input.value) + 1).toString();
+        } else if (parseInt(zone2Input.value) > parseInt(zone3Input.value)) {
+            zone2Input.value = (parseInt(zone3Input.value) - 1).toString();
+        }
+        const newvalue=(100/(parseInt(zone2Input.max)-parseInt(zone2Input.min)))*parseInt(zone2Input.value)-(100/(parseInt(zone2Input.max)-parseInt(zone2Input.min)))*parseInt(zone2Input.min)
+        zone2spanLeft.style.left=newvalue+'%';
+        thumb2.style.left=newvalue+'%';
+        occupancy2.style.right=(100-newvalue)+'%';
+        occupancy3.style.left=newvalue+'%';
+        value2span.textContent = zone2Input.value
+    }
+
+    handleZone3Change(event: Event) {
+        const zone3Input = event.target as HTMLInputElement;
+        const zone2Input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
+        const value3span = this.shadowRoot.getElementById('valueZone3')
+        const zone3spanLeft = this.shadowRoot.getElementById('spanZone3')
+        const thumb3 = this.shadowRoot.getElementById('thumb3')
+        const occupancy3 = this.shadowRoot.getElementById('zona3occupancy')
+        const occupancy4 = this.shadowRoot.getElementById('zona4occupancy')
+        // Assicura che zone3 non sia più piccola di zone2
+        if (parseInt(zone3Input.value) < parseInt(zone2Input.value)) {
+            zone3Input.value = (parseInt(zone2Input.value) + 1).toString();
+        }
+        const newvalue=(100/(parseInt(zone3Input.max)-parseInt(zone3Input.min)))*parseInt(zone3Input.value)-(100/(parseInt(zone3Input.max)-parseInt(zone3Input.min)))*parseInt(zone3Input.min)
+
+        zone3Input.oninput = (()=>{
+            
+            zone3spanLeft.style.left=newvalue+'%';
+            thumb3.style.left=newvalue+'%';
+            occupancy3.style.right=(100-newvalue)+'%';
+            occupancy4.style.width=((newvalue - 100) * -1)+'%';
+            value3span.textContent = zone3Input.value
+        });
+    }
+
+
+    firstUpdated(changedProps) {
+        if (this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]  ) {
+            const zone1input = this.shadowRoot.getElementById('zone1') as HTMLInputElement;
+            const zone2input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
+            const zone3input = this.shadowRoot.getElementById('zone3') as HTMLInputElement;
+            const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
+            const valueZone2Element = this.shadowRoot.getElementById('valueZone2') as HTMLElement;
+            const valueZone3Element = this.shadowRoot.getElementById('valueZone3') as HTMLElement;
+            valueZone1Element.innerText = zone1input.value;
+            valueZone2Element.innerText = zone2input.value;
+            valueZone3Element.innerText = zone3input.value;
+        } 
+        
+      }
+
+
 
     onRangeInputMove(event: Event) {
         const target = event.target as HTMLInputElement;
         this.MovingDistanceNumber = parseInt(target.value);
-        console.log(target.value);
     }
 
     onRangeInputStill(event: Event) {
@@ -1277,10 +1258,9 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         this.StillDistanceNumber = parseInt(target.value);
     }
 
-    select_box(entity_id, selectOptions, range, ) {
-        // const selectOptions = this.hass.states[devices[this.ld2410Name].distanceResolution]?.attributes.options;
-        // const range = this.hass.states[devices[this.ld2410Name].distanceResolution]?.state;
 
+
+    select_box(entity_id, selectOptions, range, ) {
         return html`
           <select class="options-select" name="entity" id="entity"  .value="${range}"
           @focusout=${(e) => this._callserviceSelect(entity_id, 'select', "select_option", e.target.value)}
@@ -1301,41 +1281,21 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
         
         this.ownerDocument.querySelector("home-assistant").dispatchEvent(popupEvent);
     }
-      
 
-    // select_range(devices) {
-    //     const selectOptions = this.hass.states[devices[this.ld2410Name].distanceResolution]?.attributes.options;
-    //     const range = this.hass.states[devices[this.ld2410Name].distanceResolution]?.state;
-    //     console.log(selectOptions);
-    //     console.log(range);
-    //     return html`
-
-    //     <select name="entity" id="entity" style="padding: .6em; font-size: 1em;" .value="${range}">
-            
-    //         ${selectOptions.map((attr) => {
-    //           if (attr != range) {
-    //             return html`<option value="${attr}">${attr}</option> `;
-    //           }
-    //           else {
-    //             return html`<option value="${attr}" selected>${attr}</option> `;
-    //           }
-    //         })}
-    //     </select>
-    //     <br>
-    //     <br>`
-
-    // }
 
     getLD2410DeviceNameDropdown(optionValue){
        return html`
+            ${this.config.devices_name && this.config.devices_name.length > 1 ? html`
             <select name="device_name" id="device_name" class="select-ld-device" @change=${this.handleSelectChange}>
-                ${this.config.devices_name.map((ent, index) => {
-                    const object = ent.ld_device;
-                    // Aggiungi l'attributo selected alla prima opzione
-                    return html`<option value="${object}" ${index === 0 ? 'selected' : ''}>${object}</option>`;
-                })}
+                ${this.config.devices_name.map(device => html`
+                <option style="background-color:var(--secondary-background-color);" value="${device.device}" >${device.name}</option>
+                `)}
             </select>
-`;
+
+            ` : html`
+            <div style="margin-left:0.5ch;">${this.config.devices_name[0].name}</div> 
+            `}
+                `;
     }
 
     handleSelectChange(event) {
@@ -1344,7 +1304,34 @@ viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;" xml:space="preserve
     
         // Imposta this.ld2410Name al valore selezionato
         this.ld2410Name = selectedValue;
+        this.pushValue()
     }
+
+    pushValue() {
+        this.requestUpdate();
+    
+        // Aspetta il prossimo aggiornamento della view
+        this.updateComplete.then(() => {
+            if (
+                this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] &&
+                this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] &&
+                this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]
+            ) {
+                const zone1input = this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`].state;
+                const zone2input = this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`].state;
+                const zone3input = this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`].state;
+                const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
+                const valueZone2Element = this.shadowRoot.getElementById('valueZone2') as HTMLElement;
+                const valueZone3Element = this.shadowRoot.getElementById('valueZone3') as HTMLElement;
+                valueZone1Element.innerText = zone1input;
+                valueZone2Element.innerText = zone2input;
+                valueZone3Element.innerText = zone3input;
+
+            }
+        });
+    }
+
+
 
     static get styles (): CSSResultGroup {
         return styles

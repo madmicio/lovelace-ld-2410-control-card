@@ -4,46 +4,7 @@ import { html, css, LitElement } from "lit";
 
 import { HomeAssistantFixed } from "./types";
 import { EDITOR_CARD_TAG_NAME } from "./const";
-import { getEntitiesByNameAndType, getdeviceName } from "./utils";
-
-
-const avreceivers = {
-  "anthemav": {
-    "friendlyName": "Anthem A/V Receivers",
-  },
-  "arcam_fmj": {
-    "friendlyName": "Arcam FMJ Receivers",
-  },
-  "denonavr": {
-    "friendlyName": "Denon, Marantz A/V Receivers",
-  },
-  "heos": {
-    "friendlyName": "Denon heos A/V Receivers",
-  },
-  "cast": {
-    "friendlyName": "Google Cast ",
-  },
-  "harman_kardon_avr": {
-    "friendlyName": "Harman Kardon AVR",
-  },
-  "monoprice": {
-    "friendlyName": "Monoprice 6-Zone Amplifier",
-  },
-  "onkyo": {
-    "friendlyName": "Onkyo A/V Receivers",
-  },
-  "sonos": {
-    "friendlyName": "Sonos",
-  },
-  "pws66i": {
-    "friendlyName": "Soundavo WS66i 6-Zone Amplifier",
-  },
-  "yamaha": {
-    "friendlyName": "Yamaha Network Receivers",
-  },
-}
-
-const AvReceiverdevicemap = new Map(Object.entries(avreceivers));
+import { getdeviceName } from "./utils";
 
 
 @customElement(EDITOR_CARD_TAG_NAME)
@@ -101,40 +62,166 @@ class LgD2410CardEditor extends LitElement {
 
 
 
-selectLDdevice(config) {
+  selectLDdevice(config) {
     let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
     let heading = 'device name selector';
-    let blankEntity = html``;
-    
-    // if (this._config.devices_name.ld_device == '') {
-    //     blankEntity = html`<option value="" selected> - - - - </option>`;
-    // }
-
-    if (!config || !config.device_name) {
-        config = { device_name: {} };
+  
+    if (!config || !config.devices_name) {
+      config = { devices_name: [] };
     }
-    const pippo = this._config.device_name
-
+  
+    // Filtra gli elementi che sono presenti in precenceDeviceSelector ma non in config.device_name
+    const optionsToShow = precenceDeviceSelector.filter(eid => !this._config.devices_name.some(device => device.device === eid));
+  
     return html`
-        <div class="heading">${heading}:</div>
-        <select name="ld_device" id="ld_device" class="select-item" .value="${config}"
-                @focusout=${this.deviceConfigChanged}
-                @change=${this.deviceConfigChanged}>
-            ${blankEntity}
-            ${precenceDeviceSelector.map((eid) => {
-
-                    return html`<option value="${eid}">${this.hass.states[eid].state || eid}</option> `;
-
-            })}
-        </select>
+    <br>
+    <div style="width:40ch;">
+      <div class="heading">${heading}:</div>
+      <div class="add-device">
+      <ha-icon
+        style="cursor:pointer;margin-right:1ch;"
+        data-input-name="buttons"
+        icon="mdi:plus"
+        @click=${() => {
+          const ldDeviceSelect = this.shadowRoot.getElementById('ld_device') as HTMLSelectElement;
+          if (ldDeviceSelect) {
+            this.configAddname(ldDeviceSelect.value);
+          }
+        }}
+      ></ha-icon>
+      <select
+        name="ld_device"
+        id="ld_device"
+        class="select-item"
+        .value="- - - - -"
+      >
+        <option>- - - - - - - - - -</option>
+        ${optionsToShow.map(eid => html`<option value="${eid}">${eid}</option>`)}
+      </select>
+      </div>
     </div>
     `;
+  }
+  
+
+builLIst(config) {
+  if (!config || !config.devices_name) {
+      config = { devices_name: {} };
+  }
+
+  return html`
+  ${this._config.devices_name && this._config.devices_name.length !== 0 ? html`
+    <div style="width:40ch;padding-bottom: 0.8ch;">
+      <p>LD24XX device list:</p>
+      ${this._config.devices_name.map(device => html`
+        <div class="list">
+          <ha-icon style="cursor:pointer;margin-right:1ch;" data-input-name="buttons" icon="mdi:trash-can-outline" @click=${() => this.deleteelemnt(device)}></ha-icon><div >${device.device}</div>
+        </div>
+          <div style="margin-left: calc(24px + 1ch)">name to show</div>
+          <input type="text" name="name" id="name"  class="device-name" .value=${device.name}
+              @input=${(e) => this.updateName(device.device, e.target.value)}>
+        <hr>
+
+      `)}
+    </div>
+
+    ` : html` `}
+
+  `;
 }
+
+
+  deleteelemnt(elementToDelete) {
+    const updatedDevices = this._config.devices_name.filter(device => device !== elementToDelete);
+  
+    // Creare una nuova configurazione senza modificare la configurazione esistente
+    const newConfig = Object.assign({}, this._config, { devices_name: updatedDevices });
+  
+    // Scatena l'evento "config-changed" con la nuova configurazione
+    const event = new CustomEvent("config-changed", {
+      detail: { config: newConfig },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+
+  configAddname(ev) {
+    // Verifica se ev è uguale a "- - - - - - - - - -" o "unavailable"
+    if (ev === "- - - - - - - - - -" || ev === "unavailable") {
+      return; // Non fare nulla se ev è uguale a "- - - - - - - - - -" o "unavailable"
+    }
+  
+    // Assume che this._config sia un oggetto con una chiave "devices_name" che è un array
+    const config = Object.assign({}, this._config);
+    config["devices_name"] = [...(config["devices_name"] || [])]; // Copia l'array esistente o inizializza un array vuoto
+  
+    // Aggiungi un oggetto con le chiavi "device" e "name" al campo "devices_name"
+    config["devices_name"].push({
+      device: ev,
+      name: ev, // Sostituisci con il valore di input reale
+    });
+  
+    // Aggiorna la configurazione
+    this._config = config;
+  
+    // Scatena l'evento "config-changed"
+    const event = new CustomEvent("config-changed", {
+      detail: { config: this._config },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+
+  updateName(device, newName) {
+    // Assume che this._config sia un oggetto con una chiave "devices_name" che è un array
+    const config = Object.assign({}, this._config);
+    config["devices_name"] = config["devices_name"].map(dev => {
+      if (dev.device === device) {
+        return { ...dev, name: newName };
+      }
+      return dev;
+    });
+  
+    // Aggiorna la configurazione
+    this._config = config;
+  
+    // Scatena l'evento "config-changed"
+    const event = new CustomEvent("config-changed", {
+      detail: { config: this._config },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+
+
+  configChangedname(ev) {
+    // Assume che this.config sia un oggetto con una chiave "devices_name" che è un array
+    const config = Object.assign({}, this._config);
+    config["devices_name"] = [...(config["devices_name"] || [])]; // Copia l'array esistente o inizializza un array vuoto
+  
+    // Aggiungi il valore dell'input all'array
+    const inputValue = ev.target.value;
+    config["devices_name"].push(inputValue);
+  
+    // Aggiorna la configurazione
+    this._config = config;
+  
+    // Scatena l'evento "config-changed"
+    const event = new CustomEvent("config-changed", {
+      detail: { config: this._config },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
 
   deviceConfigChanged(ev) {
       const _config = Object.assign({}, this._config);
-      _config["device_name"] = { ...(_config["device_name"] ?? {}) };
-      _config["device_name"][ev.target.name.toString()] = ev.target.value;
+      _config["devices_name"] = { ...(_config["devices_name"] ?? {}) };
+      _config["devices_name"]= ev;
       this._config = _config;
 
       const event = new CustomEvent("config-changed", {
@@ -143,45 +230,58 @@ selectLDdevice(config) {
         composed: true,
       });
       this.dispatchEvent(event);
+      console.log(ev)
     }
 
 
   render() {
-
+    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
 
     return html`
-
+            ${this.builLIst(this._config.devices_name)}
             ${this.selectLDdevice(this._config.devices_name)}
 
-prova
-            Other functionalities must be configured manually in YAML editor
+
+            
         `;
   }
 
   static get styles() {
     return css`
- 
-        .color-selector {
-            display: grid;
-            grid-template-columns: auto 8ch 3ch;
-            width: 40ch;
+        .list {
+          display:flex; 
+          flex-direction:row;
+          align-items:flex-end;
+          margin-bottom:1ch;
+          width: -webkit-fill-available;
+           
         }
- 
-        .color-item {
-            padding: .6em;
-            font-size: 1em;
+
+        .add-device {
+          display:flex;
+          flex-direction: row;
+          align-items:center;
+          width: -webkit-fill-available;
         }
+
  
         .heading {
             font-weight: bold;
+            margin-bottom: 0.8ch;
         }
  
         .select-item {
-            background-color: var(--label-badge-text-color);
-            width: 40ch;
+            flex-grow: 1;
             padding: .6em; 
             font-size: 1em;
         }
+        .device-name {
+          width: -webkit-fill-available;
+          padding: .3em; 
+          font-size: 1em;
+          margin-left: calc(24px + 1ch)
+        }
+        
  
         `;
   }
