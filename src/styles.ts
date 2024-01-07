@@ -1,6 +1,13 @@
 import { css } from 'lit'
 
 export default css`
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 hr {
     width: 100%;
     border-color: var(--divider-color);
@@ -17,7 +24,7 @@ ha-card {
 
     /* --slider-height: 350px; */
     /* --slider-width: 50px; */
-    /* --label-width: calc(var(--slider-width) - 15%); */
+    --label-width: calc(var(--slider-width) - 15%); 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -31,8 +38,14 @@ ha-card {
 }
 
 
-        ha-icon {
+        .ha-icon-option {
             color: var(--state-icon-color);
+        }
+
+        .ha-icon-alert {
+          margin: 10px 20px;
+          color: red;
+          animation: blinker 1.5s linear infinite;
         }
 
         ha-switch {
@@ -381,7 +394,7 @@ ha-card {
         background-color: rgba(255, 0, 0, 0.6);
         
         height: 100%;
-        border-radius: 0px 9px 9px 9px;
+        border-radius: 0px 4px 4px 9px;
     } 
 
     .select-ld-device {
@@ -487,7 +500,7 @@ ha-card {
             height: 14px;
             border-radius: 10px;
             text-align: left;
-            margin: 75px 0px 10px 8px;
+            margin: 80px 0px 10px 8px;
           }
           
           [slider] > div {
@@ -610,7 +623,7 @@ ha-card {
             top: -2px;
             width: 100%;
             -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-            filter: alpha(opacity=0);
+            filter: alpha(opacity=1);
             -moz-opacity: 0;
             -khtml-opacity: 0;
             opacity: 0;
@@ -686,14 +699,15 @@ ha-card {
             opacity: 0;
             position: absolute;
             margin-left: -11px;
-            top: -74px;
+            top: -78px;
             z-index: 3;
-            background-color: var(--primary-color);
+            background-color: transparent;
+            // background-color: var(--primary-color);
             color: #fff;
             width: 28px;
             height: 28px;
-            border-radius: 28px;
-            -webkit-border-radius: 28px;
+            // border-radius: 28px;
+            // -webkit-border-radius: 28px;
             align-items: center;
             -webkit-justify-content: center;
             justify-content: center;
@@ -701,24 +715,53 @@ ha-card {
             font-size: 12px;
             font-weight: 700;
             line-height: 28px;
+            
           }
           
           [slider] > div > [sign]:after {
             position: absolute;
             content: "";
-            left: 0;
-            border-radius: 16px;
-            top: 19px;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top-width: 16px;
-            border-top-style: solid;
-            border-top-color: var(--primary-color);
+            width: 28px;
+            height: 28px;
+            left: 50%;
+            // border-radius: 16px;
+            // top: 19px;
+            background-color:red;
+            z-index: -1;
+            transform: translateX(-50%) rotate(45deg);
+            border: 3px solid var(--primary-color);
+            border-top-left-radius: 50%;
+            border-top-right-radius: 50%;
+            border-bottom-left-radius: 50%;
+            // border-left: 14px solid transparent;
+            // border-right: 14px solid transparent;
+            // border-top-width: 16px;
+            // border-top-style: solid;
+            // border-top-color: var(--primary-color);
           }
           
 
           [slider]:hover > div > [sign] {
             opacity: 1;
           }
+
+          .unavailable {
+            font-size: 18px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0 10px 0;
+          }
+
+          // gmove & gstill
+          .st0{fill:var(--divider-color)}
+          .st1{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
+          .st2{fill:var(--primary-text-color);}
+          .st4{font-size:10px;}
+          .st5{fill:none;stroke:var(--divider-color);stroke-miterlimit:10;}
+
+
+
           
 `
