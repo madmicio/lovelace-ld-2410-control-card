@@ -63,7 +63,7 @@ class LgD2410CardEditor extends LitElement {
 
 
   selectLDdevice(config) {
-    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
+    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'espresenceld_', 'timeout');
     let heading = 'device name selector';
   
     if (!config || !config.devices_name) {
@@ -71,9 +71,11 @@ class LgD2410CardEditor extends LitElement {
     }
   
     // Filtra gli elementi che sono presenti in precenceDeviceSelector ma non in config.device_name
-    const optionsToShow = precenceDeviceSelector.filter(eid => !this._config.devices_name.some(device => device.device === eid));
-  
+    const optionsToShow = precenceDeviceSelector.filter(device => {
+      return !this._config.devices_name.some(configDevice => configDevice.device === device.device);
+  });
     return html`
+    
     <br>
     <div style="width:40ch;">
       <div class="heading">${heading}:</div>
@@ -83,12 +85,14 @@ class LgD2410CardEditor extends LitElement {
         data-input-name="buttons"
         icon="mdi:plus"
         @click=${() => {
-          const ldDeviceSelect = this.shadowRoot.getElementById('ld_device') as HTMLSelectElement;
-          if (ldDeviceSelect) {
-            this.configAddname(ldDeviceSelect.value);
-          }
+            const ldDeviceSelect = this.shadowRoot.getElementById('ld_device') as HTMLSelectElement;
+            if (ldDeviceSelect) {
+                const selectedOption = ldDeviceSelect.options[ldDeviceSelect.selectedIndex];
+                const friendlyName = selectedOption.textContent.trim();
+                this.configAddname(ldDeviceSelect.value, friendlyName);
+            }
         }}
-      ></ha-icon>
+    ></ha-icon>
       <select
         name="ld_device"
         id="ld_device"
@@ -96,7 +100,7 @@ class LgD2410CardEditor extends LitElement {
         .value="- - - - -"
       >
         <option>- - - - - - - - - -</option>
-        ${optionsToShow.map(eid => html`<option value="${eid}">${eid}</option>`)}
+        ${optionsToShow.map(device => html`<option value="${device.device}">${device.friendly_name}</option>`)}
       </select>
       </div>
     </div>
@@ -146,7 +150,7 @@ builLIst(config) {
     this.dispatchEvent(event);
   }
 
-  configAddname(ev) {
+  configAddname(ev, friendlyName) {
     // Verifica se ev è uguale a "- - - - - - - - - -" o "unavailable"
     if (ev === "- - - - - - - - - -" || ev === "unavailable") {
       return; // Non fare nulla se ev è uguale a "- - - - - - - - - -" o "unavailable"
@@ -159,7 +163,7 @@ builLIst(config) {
     // Aggiungi un oggetto con le chiavi "device" e "name" al campo "devices_name"
     config["devices_name"].push({
       device: ev,
-      name: ev, // Sostituisci con il valore di input reale
+      name: friendlyName, // Sostituisci con il valore di input reale
     });
   
     // Aggiorna la configurazione
@@ -235,8 +239,6 @@ builLIst(config) {
 
 
   render() {
-    let precenceDeviceSelector = getdeviceName(this.hass, 'esphome', 'ld2410_device_name');
-
     return html`
             ${this.builLIst(this._config.devices_name)}
             ${this.selectLDdevice(this._config.devices_name)}

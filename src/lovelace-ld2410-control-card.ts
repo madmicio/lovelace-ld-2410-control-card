@@ -46,7 +46,7 @@ export class Ld2410CustomCard extends LitElement {
    @property({ attribute: false }) private config!: any;
    @property({ type: Number }) private MovingDistanceNumber: any;
    @property({ type: Number }) private StillDistanceNumber: any;
-   @property({ type: String }) private ld2410Name: string = '';
+   @property({ type: String }) private ld24xxName: string = '';
    private _parametroDistanza: boolean;
    private _show_main: boolean;
    private _show_options: boolean;
@@ -60,16 +60,17 @@ export class Ld2410CustomCard extends LitElement {
 }
 
     public static getStubConfig(hass: HomeAssistantFixed) {
-        let entities = getdeviceName(hass, 'esphome', 'ld2410_device_name');
+        let entities = getdeviceName(hass, 'esphome', 'espresenceld_', 'timeout');
+        console.log(entities);
     
-        const entity = entities.length > 0 ? entities[0] : "nessun ld2410";
+        // const entity = entities.length > 0 ? entities[0] : "nessun ld2410";
     
         return {
         "type": `custom:${CARD_TAG_NAME}`,
         "devices_name": [
             {
-            "device": entity,
-            "name": entity
+            "device": entities[0].device,
+            "name": entities[0].friendly_name
             }
         ]
         };
@@ -81,7 +82,7 @@ export class Ld2410CustomCard extends LitElement {
         config: {},
         MovingDistanceNumber: { type: Number, reflect: true },
         StillDistanceNumber: { type: Number, reflect: true },
-        ld2410Name: { type: String, reflect: true },
+        ld24xxName: { type: String, reflect: true },
         _parametroDistanza: {},
         _show_main: {},
         _show_options: {},
@@ -111,7 +112,7 @@ constructor() {
     // }
     
     this.config = config;
-    this.ld2410Name = this.config.devices_name[0].device;
+    this.ld24xxName = this.config.devices_name[0].device;
     }
 
     getCardSize() {
@@ -131,87 +132,87 @@ constructor() {
 
         
         const ld24xx = {
-                "engineering_mode" : `switch.${this.ld2410Name}_engineering_mode`,
-                "precence_sensor" : `binary_sensor.${this.ld2410Name}_presence`,
-                "DetectionDistance" : `sensor.${this.ld2410Name}_detection_distance`,
-                "DistanceMoveDistance" : `sensor.${this.ld2410Name}_moving_distance`,
-                "DistanceStillDistance" : `sensor.${this.ld2410Name}_still_distance`,
-                "externalLightSensor" : `sensor.${this.ld2410Name}_light_sensor`,
-                "move_distance_n_gates" : `number.${this.ld2410Name}_max_move_distance_gate`,
-                "StillDistanceSensor" : `sensor.${this.ld2410Name}_still_distance`,
-                "still_distance_n_gates" : `number.${this.ld2410Name}_max_still_distance_gate`,
-                "distanceResolution" : `select.${this.ld2410Name}_distance_resolution`,
-                "baudRate" : `select.${this.ld2410Name}_baud_rate`,
-                "lightFunction" : `select.${this.ld2410Name}_light_function`,
-                "lightTreshold" : `number.${this.ld2410Name}_light_threshold`,
-                "lightSensor" : `sensor.${this.ld2410Name}_light`,
-                "outPinLevel" : `select.${this.ld2410Name}_out_pin_level`,
-                "outPinStatus" : `binary_sensor.${this.ld2410Name}_out_pin_presence_status`,
-                "presenceLed" : `switch.${this.ld2410Name}_deactivate_presence_led`,
-                "timeOut" : `number.${this.ld2410Name}_timeout`,
-                "greenStatuLed" : `light.${this.ld2410Name}_green_led_status`,
-                "bluetooth" : `switch.${this.ld2410Name}_control_bluetooth`,
-                "rebootEsp" : `button.${this.ld2410Name}_esp_reboot`,
-                "firmwareUpgrade" : `update.${this.ld2410Name}_firmware`,
-                "firmwareVersion" : `sensor.${this.ld2410Name}_firmware_version`,
-                "factoryRest" : `button.${this.ld2410Name}_factory_reset`,
-                "macAddress" : `sensor.${this.ld2410Name}_mac_address`,
-                "queryParams" : `button.${this.ld2410Name}_query_params`,
-                "restart" : `button.${this.ld2410Name}_restart`,
-                "zone1End" : `number.${this.ld2410Name}_zone_1_end_distance`,
-                "zone2End" : `number.${this.ld2410Name}_zone_2_end_distance`,
-                "zone3End" : `number.${this.ld2410Name}_zone_3_end_distance`,
-                "zone1occupancy" : `binary_sensor.${this.ld2410Name}_zone_1_occupancy`,
-                "zone2occupancy" : `binary_sensor.${this.ld2410Name}_zone_2_occupancy`,
-                "zone3occupancy" : `binary_sensor.${this.ld2410Name}_zone_3_occupancy`,
+                "engineering_mode" : `switch.${this.ld24xxName}_engineering_mode`,
+                "precence_sensor" : `binary_sensor.${this.ld24xxName}_presence`,
+                "DetectionDistance" : `sensor.${this.ld24xxName}_detection_distance`,
+                "DistanceMoveDistance" : `sensor.${this.ld24xxName}_moving_distance`,
+                "DistanceStillDistance" : `sensor.${this.ld24xxName}_still_distance`,
+                "externalLightSensor" : `sensor.${this.ld24xxName}_light_sensor`,
+                "move_distance_n_gates" : `number.${this.ld24xxName}_max_move_distance_gate`,
+                "StillDistanceSensor" : `sensor.${this.ld24xxName}_still_distance`,
+                "still_distance_n_gates" : `number.${this.ld24xxName}_max_still_distance_gate`,
+                "distanceResolution" : `select.${this.ld24xxName}_distance_resolution`,
+                "baudRate" : `select.${this.ld24xxName}_baud_rate`,
+                "lightFunction" : `select.${this.ld24xxName}_light_function`,
+                "lightTreshold" : `number.${this.ld24xxName}_light_threshold`,
+                "lightSensor" : `sensor.${this.ld24xxName}_light`,
+                "outPinLevel" : `select.${this.ld24xxName}_out_pin_level`,
+                "outPinStatus" : `binary_sensor.${this.ld24xxName}_out_pin_presence_status`,
+                "presenceLed" : `switch.${this.ld24xxName}_deactivate_presence_led`,
+                "timeOut" : `number.${this.ld24xxName}_timeout`,
+                "greenStatuLed" : `light.${this.ld24xxName}_green_led_status`,
+                "bluetooth" : `switch.${this.ld24xxName}_control_bluetooth`,
+                "rebootEsp" : `button.${this.ld24xxName}_esp_reboot`,
+                "firmwareUpgrade" : `update.${this.ld24xxName}_firmware`,
+                "firmwareVersion" : `sensor.${this.ld24xxName}_firmware_version`,
+                "factoryRest" : `button.${this.ld24xxName}_factory_reset`,
+                "macAddress" : `sensor.${this.ld24xxName}_mac_address`,
+                "queryParams" : `button.${this.ld24xxName}_query_params`,
+                "restart" : `button.${this.ld24xxName}_restart`,
+                "zone1End" : `number.${this.ld24xxName}_zone_1_end_distance`,
+                "zone2End" : `number.${this.ld24xxName}_zone_2_end_distance`,
+                "zone3End" : `number.${this.ld24xxName}_zone_3_end_distance`,
+                "zone1occupancy" : `binary_sensor.${this.ld24xxName}_zone_1_occupancy`,
+                "zone2occupancy" : `binary_sensor.${this.ld24xxName}_zone_2_occupancy`,
+                "zone3occupancy" : `binary_sensor.${this.ld24xxName}_zone_3_occupancy`,
               "gates": {
                 "g1": {
-                  "gmove": `number.${this.ld2410Name}_g0_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g0_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g0_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g0_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g0_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g0_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g0_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g0_still_energy`
                 },
                 "g2": {
-                  "gmove": `number.${this.ld2410Name}_g1_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g1_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g1_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g1_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g1_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g1_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g1_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g1_still_energy`
                 },
                 "g3": {
-                  "gmove": `number.${this.ld2410Name}_g2_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g2_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g2_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g2_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g2_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g2_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g2_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g2_still_energy`
                 },
                 "g4": {
-                  "gmove": `number.${this.ld2410Name}_g3_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g3_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g3_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g3_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g3_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g3_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g3_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g3_still_energy`
                 },
                 "g5": {
-                  "gmove": `number.${this.ld2410Name}_g4_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g4_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g4_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g4_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g4_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g4_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g4_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g4_still_energy`
                 },
                 "g6": {
-                  "gmove": `number.${this.ld2410Name}_g5_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g5_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g5_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g5_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g5_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g5_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g5_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g5_still_energy`
                 },
                 "g7": {
-                  "gmove": `number.${this.ld2410Name}_g6_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g6_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g6_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g6_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g6_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g6_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g6_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g6_still_energy`
                 },
                 "g8": {
-                  "gmove": `number.${this.ld2410Name}_g7_move_threshold`,
-                  "gmoveenergie": `sensor.${this.ld2410Name}_g7_move_energy`,
-                  "gstill": `number.${this.ld2410Name}_g7_still_threshold`,
-                  "gstillenergie": `sensor.${this.ld2410Name}_g7_still_energy`
+                  "gmove": `number.${this.ld24xxName}_g7_move_threshold`,
+                  "gmoveenergie": `sensor.${this.ld24xxName}_g7_move_energy`,
+                  "gstill": `number.${this.ld24xxName}_g7_still_threshold`,
+                  "gstillenergie": `sensor.${this.ld24xxName}_g7_still_energy`
                 }
             }
           };
@@ -219,10 +220,8 @@ constructor() {
 
 
                     
-          const pippoThreshold = ld24xx.gates.g3.gmove;
           const deviceMap = ld24xx.gates;
           const PrecenceSensorState = this.hass.states[ld24xx.precence_sensor]?.state;
-          const PrecenceSensor = ld24xx.precence_sensor;
           const engeneerinMode = this.hass.states[ld24xx.engineering_mode]?.state; 
           const movingDistantSensor: number = Number(this.hass.states[ld24xx.DetectionDistance]?.state);
           const movingDistance: number = Number(this.hass.states[ld24xx.DetectionDistance]?.state);
@@ -239,7 +238,6 @@ constructor() {
             let calculatedPercentageStillDistance;
             let calculateddistanceSensor;
             let distanceSvgMan;
-            let distanceSvgManBar;
             const numGatesAttivi: number = Number(this.hass.states[ld24xx.move_distance_n_gates]?.state)
             var maxDistanza;
             if (this.hass.states[ld24xx.distanceResolution]?.state === '0.75m') {
@@ -272,7 +270,7 @@ constructor() {
             const stillDistancePerc: number = Number(calculatedPercentageStillDistance > 100 ? 100 : calculatedPercentageStillDistance);
             let zoneConfig;
             
-            if (this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]  ) {
+            if (this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]  ) {
 
                 zoneConfig = true;
             } else {
@@ -283,10 +281,8 @@ constructor() {
             const zone2 : number = Number(this.hass.states[ld24xx.zone2End]?.state)
             const zone3 : number = Number(this.hass.states[ld24xx.zone3End]?.state)
 
-            
-
-
-          return html`
+            return html`
+          ${zone1}
             <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -386,7 +382,7 @@ constructor() {
                  `}
                  </div>
                 <hr>
-                ${this.hass.states[`sensor.${this.ld2410Name}_ld2410_device_name`] && this.hass.states[`sensor.${this.ld2410Name}_ld2410_device_name`].state !== "unavailable" ? html`
+                ${this.hass.states[`number.${this.ld24xxName}_timeout`] && this.hass.states[`number.${this.ld24xxName}_timeout`].state !== "unavailable" ? html`
                 ${this._show_options ? html`
                 <div class="select-options-container">
                     <div class="select-options-item">
@@ -1105,7 +1101,7 @@ constructor() {
         let maxdistanza;
         let distArray;
         // valore invertito 0.75m e 0.2m per ottenere stato corretto
-        if (this.hass.states[`select.${this.ld2410Name}_distance_resolution`]?.state === '0.75m') {
+        if (this.hass.states[`select.${this.ld24xxName}_distance_resolution`]?.state === '0.75m') {
             distArray = ["0,75m", "1,50m", "2,25m", "3,00m", "3,75m", "4,50m", "5,25m", "6,00m"];
             if (!isNaN(value) && value >= 1 && value <= distArray.length) {
                 maxdistanza = (parseFloat(distArray[value - 1].replace('m', '').replace(',', '.')) * 100);
@@ -1232,7 +1228,7 @@ constructor() {
 
 
     firstUpdated(changedProps) {
-        if (this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] && this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]  ) {
+        if (this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]  ) {
             const zone1input = this.shadowRoot.getElementById('zone1') as HTMLInputElement;
             const zone2input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
             const zone3input = this.shadowRoot.getElementById('zone3') as HTMLInputElement;
@@ -1302,8 +1298,8 @@ constructor() {
         // Ottieni il valore selezionato
         const selectedValue = event.target.value;
     
-        // Imposta this.ld2410Name al valore selezionato
-        this.ld2410Name = selectedValue;
+        // Imposta this.ld24xxName al valore selezionato
+        this.ld24xxName = selectedValue;
         this.pushValue()
     }
 
@@ -1313,13 +1309,13 @@ constructor() {
         // Aspetta il prossimo aggiornamento della view
         this.updateComplete.then(() => {
             if (
-                this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`] &&
-                this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`] &&
-                this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`]
+                this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] &&
+                this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] &&
+                this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]
             ) {
-                const zone1input = this.hass.states[`number.${this.ld2410Name}_zone_1_end_distance`].state;
-                const zone2input = this.hass.states[`number.${this.ld2410Name}_zone_2_end_distance`].state;
-                const zone3input = this.hass.states[`number.${this.ld2410Name}_zone_3_end_distance`].state;
+                const zone1input = this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`].state;
+                const zone2input = this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`].state;
+                const zone3input = this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`].state;
                 const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
                 const valueZone2Element = this.shadowRoot.getElementById('valueZone2') as HTMLElement;
                 const valueZone3Element = this.shadowRoot.getElementById('valueZone3') as HTMLElement;
