@@ -134,7 +134,7 @@ constructor() {
         const ld24xx = {
                 "engineering_mode" : `switch.${this.ld24xxName}_engineering_mode`,
                 "precence_sensor" : `binary_sensor.${this.ld24xxName}_presence`,
-                "DetectionDistance" : `sensor.${this.ld24xxName}_detection_distance`,
+                "DetectionDistance" : `sensor.${this.ld24xxName}_last_detection_distance`,
                 "DistanceMoveDistance" : `sensor.${this.ld24xxName}_moving_distance`,
                 "DistanceStillDistance" : `sensor.${this.ld24xxName}_still_distance`,
                 "externalLightSensor" : `sensor.${this.ld24xxName}_light_sensor`,
@@ -155,10 +155,10 @@ constructor() {
                 "rebootEsp" : `button.${this.ld24xxName}_esp_reboot`,
                 "firmwareUpgrade" : `update.${this.ld24xxName}_firmware`,
                 "firmwareVersion" : `sensor.${this.ld24xxName}_firmware_version`,
-                "factoryRest" : `button.${this.ld24xxName}_factory_reset`,
+                "factoryRest" : `button.${this.ld24xxName}_ld_2410_factory_reset`, 
                 "macAddress" : `sensor.${this.ld24xxName}_mac_address`,
                 "queryParams" : `button.${this.ld24xxName}_query_params`,
-                "restart" : `button.${this.ld24xxName}_restart`,
+                "restart" : `button.${this.ld24xxName}_ld_2410_restart`,
                 "zone1End" : `number.${this.ld24xxName}_zone_1_end_distance`,
                 "zone2End" : `number.${this.ld24xxName}_zone_2_end_distance`,
                 "zone3End" : `number.${this.ld24xxName}_zone_3_end_distance`,
@@ -282,7 +282,6 @@ constructor() {
             const zone3 : number = Number(this.hass.states[ld24xx.zone3End]?.state)
 
             return html`
-          ${zone1}
             <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -452,21 +451,21 @@ constructor() {
                     </div>
                     <div class="options-right">
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.presenceLed)}>${this.hass.states[ld24xx.presenceLed]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.presenceLed)}>Presence LED</div>
                             <ha-switch 
                             .checked="${this.hass.states[ld24xx.presenceLed]?.state === 'on' ? true : false}"
                                 @click="${() => this._callservice(ld24xx.presenceLed, 'switch', 'toggle')}"
                             ></ha-switch>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.greenStatuLed)}>${this.hass.states[ld24xx.greenStatuLed]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.greenStatuLed)}>Green LED</div>
                             <ha-switch 
                             .checked="${this.hass.states[ld24xx.greenStatuLed]?.state === 'on' ? true : false}"
                                 @click="${() => this._callservice(ld24xx.greenStatuLed, 'light', 'toggle')}"
                             ></ha-switch>
                         </div>
                         <div class="space-between-options-item">
-                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.bluetooth)}>${this.hass.states[ld24xx.bluetooth]?.attributes.friendly_name}</div>
+                            <div style="cursor: pointer;" @click=${() => this._moreinfo(ld24xx.bluetooth)}>Bluetooth Control</div>
                             <ha-switch 
                             .checked="${this.hass.states[ld24xx.bluetooth]?.state === 'on' ? true : false}"
                                 @click="${() => this._callservice(ld24xx.bluetooth, 'switch', 'toggle')}"
@@ -554,6 +553,7 @@ constructor() {
                 <style type="text/css">
                     .meter-principale-rettangolo{fill:var(--mdc-select-fill-color);}
                     .primary_color{fill:var(--primary-color);}
+                    .grey_man{fill: var(--divider-color)}
 
                 </style>
                 <g id="gruppo-gates-fissi">
@@ -603,11 +603,11 @@ constructor() {
                     
                     <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                     viewBox="0 0 12 45" style="enable-background:new 0 0 12 45;height: 45px;margin-left:${distanceSvgMan}px;" xml:space="preserve">
-                    <g id="man">
-                    <path class="primary_color" d="M6,9.7c0.6,0,1.4,0,2.5,0c2.4,0,3.5,3.1,3.5,4.6c0,3.3,0,6.8,0,11.7c0,1.5-1.5,0.6-1.7,1.9
+                    <g id="man" style="fill:${PrecenceSensorState === 'on' ? 'var(--primary-color)' : 'var(--divider-color)'}">
+                    <path  d="M6,9.7c0.6,0,1.4,0,2.5,0c2.4,0,3.5,3.1,3.5,4.6c0,3.3,0,6.8,0,11.7c0,1.5-1.5,0.6-1.7,1.9
                     C9.7,33.4,9.8,37.4,9,41.6c-0.1,0.6-0.7,1.6-2.3,1.6L6,44.9h0l-0.7-1.7c-1.7,0-2.2-1-2.3-1.6c-0.7-4.1-0.6-8.1-1.3-13.7
                     C1.5,26.6,0,27.5,0,26c0-4.9,0-8.4,0-11.7c0-1.6,1.1-4.6,3.5-4.6C4.5,9.7,5.4,9.7,6,9.7"/>
-                    <ellipse class="primary_color" cx="6" cy="4.7" rx="4.1" ry="4.1"/>
+                    <ellipse  cx="6" cy="4.7" rx="4.1" ry="4.1"/>
                     </g>
                     </svg>
                   
@@ -1228,17 +1228,7 @@ constructor() {
 
 
     firstUpdated(changedProps) {
-        if (this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]  ) {
-            const zone1input = this.shadowRoot.getElementById('zone1') as HTMLInputElement;
-            const zone2input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
-            const zone3input = this.shadowRoot.getElementById('zone3') as HTMLInputElement;
-            const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
-            const valueZone2Element = this.shadowRoot.getElementById('valueZone2') as HTMLElement;
-            const valueZone3Element = this.shadowRoot.getElementById('valueZone3') as HTMLElement;
-            valueZone1Element.innerText = zone1input.value;
-            valueZone2Element.innerText = zone2input.value;
-            valueZone3Element.innerText = zone3input.value;
-        } 
+        this.pushValue()
         
       }
 
@@ -1308,22 +1298,17 @@ constructor() {
     
         // Aspetta il prossimo aggiornamento della view
         this.updateComplete.then(() => {
-            if (
-                this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] &&
-                this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] &&
-                this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]
-            ) {
-                const zone1input = this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`].state;
-                const zone2input = this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`].state;
-                const zone3input = this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`].state;
+            if (this.hass.states[`number.${this.ld24xxName}_zone_1_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_2_end_distance`] && this.hass.states[`number.${this.ld24xxName}_zone_3_end_distance`]  ) {
+                const zone1input = this.shadowRoot.getElementById('zone1') as HTMLInputElement;
+                const zone2input = this.shadowRoot.getElementById('zone2') as HTMLInputElement;
+                const zone3input = this.shadowRoot.getElementById('zone3') as HTMLInputElement;
                 const valueZone1Element = this.shadowRoot.getElementById('valueZone1') as HTMLElement;
                 const valueZone2Element = this.shadowRoot.getElementById('valueZone2') as HTMLElement;
                 const valueZone3Element = this.shadowRoot.getElementById('valueZone3') as HTMLElement;
-                valueZone1Element.innerText = zone1input;
-                valueZone2Element.innerText = zone2input;
-                valueZone3Element.innerText = zone3input;
-
-            }
+                valueZone1Element.innerText = zone1input.value;
+                valueZone2Element.innerText = zone2input.value;
+                valueZone3Element.innerText = zone3input.value;
+            } 
         });
     }
 
