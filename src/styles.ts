@@ -127,6 +127,7 @@ ha-card {
             margin: 15px 0px 15px 15px;
             display:flex; 
             justify-content:space-between;
+            font-size: calc(var(--card-width) / (220/7));
         }
 
 
