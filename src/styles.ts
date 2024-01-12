@@ -184,6 +184,8 @@ ha-card {
             justify-content: center;
             align-items: center;
         }
+
+    
     
     .gates-container {
         display:flex;
@@ -192,13 +194,14 @@ ha-card {
         justify-content: center;
         /* background-color: burlywood; */
         /* width: var(--card-width2); */
-        overflow: hidden;
+        // overflow: hidden;
+        margin-inline: 20px;
     }
     .inner-gates-container {
-        width:var(--slider-width);
+        width:45px;
         display:flex;
         flex-direction:column;
-        align-items:center;
+        align-items:left;
         /* height:100%; */
         /* margin:auto; */
     }
@@ -207,43 +210,73 @@ ha-card {
     display:inline-block;
     } */
     
-    .div-input-value{
-        height: calc(var(--slider-width) / 4);
-        margin-left: calc(var(--slider-width) / 2.5);
-        margin-top: 15%;
-    }
+    // .div-input-value{
+    //     height: calc(var(--slider-width) / 4);
+    //     margin-left: calc(var(--slider-width) / 2.5);
+    //     margin-top: 15%;
+    // }
 
     h2{
         /* z-index: 1; */
         color: var(--card-background-color);
     border: 1px solid var(--divider-color);
     background-color: var(--primary-color);
-    width: calc(var(--slider-width) / 2.4);
-    height:calc(var(--slider-width) / 4);
-    border-radius: calc(var(--slider-width) /12);
+    width: 15px;
+    height:12px;
+    border-radius: 3px;;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(var(--slider-width) /4.5);
-    margin-top:0;
+    font-size: 10px;;
+    margin-top:-10px;
+    position: relative;
+    left: -3px;
+    top: 11px;
 
     }
+
+    input[type=range][orient=vertical] {
+      appearance: slider-vertical;
+      width: 8px;
+      height: 100%;
+      padding: 0 5px;
+      opacity: 0;
+      border-radius: 0px;
+  }
+
+
+  input[type=range][orient=vertical]:hover {
+    opacity: 1;
+  }
+
+
+    .halfslidertext {
+      text-align: center;
+      background-color: var(--primary-background-color);
+      aspect-ratio: 1 / 1;
+      font-size: calc(var(--card-width) / (220/7));
+      line-height: var(--halfsliderwidth);
+
+    }
+
     .distance_sensor_value {
         z-index: 1;
         display: flex;
         justify-content: center;
         align-items: center;
         background-color: var(--primary-backgound-color);
-        
+        font-size: 12px;
         border: 1px solid var(--divider-color);
-        width: var(--label-width);
+        width: 25px;
         aspect-ratio: 2 / 1;
-        border-radius: 5px;;
+        border-radius: 5px;
+        position: relative;
+        left: -28px;
         
     color: var(--primary-text-color);
     display: flex;
 
-    margin-bottom: 10px;
+    margin-bottom: 4px;
     
     font-size: calc(var(--slider-width) /4);
     margin-top:0;
@@ -257,30 +290,69 @@ ha-card {
     } */
 
     .value-off {
-        background-color: var(--disabled-text-color);
-        color: var(--card-background-color)
+      z-index: 1;
+      display: flex;
+      align-self: center;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      border: 1px solid var(--divider-color);
+      width: 34px;
+      aspect-ratio: 2 / 1;
+      border-radius: 5px;
+      background-color: var(--disabled-text-color);
+      color: var(--card-background-color);
+      margin-bottom: 5px;
+      margin-top: 11px;
     }
 
-    .g-name{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: var(--primary-backgound-color);
-        
-        border: 1px solid var(--divider-color);
-        width: var(--label-width);
-        aspect-ratio: 2 / 1;
-        border-radius: 5px;;
-        
-    color: var(--primary-text-color);
-    display: flex;
-
-    margin-bottom: 10px;
+    .g-name {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--primary-backgound-color);
+      align-self: center;
+      border: 1px solid var(--divider-color);
+      width: 40px;
+      aspect-ratio: 2 / 1;
+      border-radius: 5px;
+      color: var(--primary-text-color);
+      display: flex;
+      margin-bottom: 10px;
+      font-size: 10px;
+      margin-top: 10px;
+      margin-left: 14px;
+      margin-right: 14px;
+      cursor: pointer; /* Add cursor pointer for better user experience */
     
-    font-size: calc(var(--slider-width) / 3.2);
-    margin-top:10px;
-    margin-left: 14px;
-    margin-right: 14px;;
+      transition: background-color 0.3s; /* Add transition for a smooth effect */
+    
+      /* Styles for the tooltip */
+      white-space: nowrap;
+    }
+    
+    .g-name::before {
+      content: "from g" attr(data-gfrom) " to g" attr(data-gto);
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 5px;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1;
+    }
+    
+    .g-name:hover {
+      background-color: /* Your hover background color */;
+    }
+    
+    .g-name:hover::before {
+      opacity: 1;
     }
 
     .g-name-off {
@@ -292,12 +364,14 @@ ha-card {
 
         .slider-off {
         border: 1px solid var(--divider-color);
-    height: var(--slider-height);
-    width: var(--slider-width);
-    color: var(--disabled-text-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        height: 279px;
+        width: 45px;
+        color: var(--disabled-text-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 37.5px;
+    
     
 
     }
@@ -313,7 +387,7 @@ ha-card {
     .range-holder input[type="range"] {
     outline: 0;
     cursor: pointer;
-    border: 1px solid var(--divider-color);
+    // border: 1px solid var(--divider-color);
     width: var(--slider-height);
     margin: 0;
     transition: box-shadow 0.2s ease-in-out;
@@ -323,17 +397,20 @@ ha-card {
     -ms-transform:rotate(270deg);
     transform:rotate(270deg);
     overflow: hidden;
-    height: var(--slider-width);
+    height: var(--halfsliderwidth);
     -webkit-appearance: none;
     background: linear-gradient(to right, rgba(255, 0, 0, 0.4) 96%, rgba(255, 0, 0, 0.4) 4%);
     /* background-size: 30% 100%; */
     background-repeat: no-repeat;
     position: absolute;
-    top: calc(50% - (var(--slider-width) / 2));
+    top: calc(50% - (var(--halfsliderwidth) / 2));
     right: calc(50% - (var(--slider-height) / 2));
     }
+
+
+
     .range-holder input[type="range"]::-webkit-slider-runnable-track {
-    height: var(--slider-width);
+    height: var(--halfsliderwidth);
     -webkit-appearance: none;
     color: #e0c2c2;
     margin-top: -1px;
@@ -342,7 +419,7 @@ ha-card {
     .range-holder input[type="range"]::-webkit-slider-thumb {
     width: 6px;
     -webkit-appearance: none;
-    height: var(--slider-width);
+    height: var(--halfsliderwidth);
     cursor: ns-resize;
     background: var(--primary-color);
     border-radius: 5px;
