@@ -125,8 +125,18 @@ constructor() {
         
         const browserName = this.getBrowserName();
         const cardWidth = this.getBoundingClientRect().width;
-        const sliderWidth = (cardWidth - 52) / 8;
-        const sliderHeight = cardWidth / 1.4;
+        const sliderWidth  = Math.floor(340 / 8);
+        // const sliderWidth  = Math.floor((cardWidth - 52) / 8);
+
+        let slider;
+        let sliderBackGroundColor;
+        if (this._show_gstill === true && this._show_gmove === true) {
+            slider = Math.floor((sliderWidth  / 2) -2);
+        } else {
+            slider = sliderWidth; 
+        }
+
+        const sliderHeight = Math.floor(cardWidth / 1.4);
         const cardWidthPadding = cardWidth - 52;
         
 
@@ -166,54 +176,60 @@ constructor() {
                 "zone2occupancy" : `binary_sensor.${this.ld24xxName}_zone_2_occupancy`,
                 "zone3occupancy" : `binary_sensor.${this.ld24xxName}_zone_3_occupancy`,
               "gates": {
-                "g1": {
+                "g0": {
                   "gmove": `number.${this.ld24xxName}_g0_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g0_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g0_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g0_still_energy`
                 },
-                "g2": {
+                "g1": {
                   "gmove": `number.${this.ld24xxName}_g1_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g1_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g1_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g1_still_energy`
                 },
-                "g3": {
+                "g2": {
                   "gmove": `number.${this.ld24xxName}_g2_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g2_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g2_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g2_still_energy`
                 },
-                "g4": {
+                "g3": {
                   "gmove": `number.${this.ld24xxName}_g3_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g3_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g3_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g3_still_energy`
                 },
-                "g5": {
+                "g4": {
                   "gmove": `number.${this.ld24xxName}_g4_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g4_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g4_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g4_still_energy`
                 },
-                "g6": {
+                "g5": {
                   "gmove": `number.${this.ld24xxName}_g5_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g5_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g5_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g5_still_energy`
                 },
-                "g7": {
+                "g6": {
                   "gmove": `number.${this.ld24xxName}_g6_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g6_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g6_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g6_still_energy`
                 },
-                "g8": {
+                "g7": {
                   "gmove": `number.${this.ld24xxName}_g7_move_threshold`,
                   "gmoveenergie": `sensor.${this.ld24xxName}_g7_move_energy`,
                   "gstill": `number.${this.ld24xxName}_g7_still_threshold`,
                   "gstillenergie": `sensor.${this.ld24xxName}_g7_still_energy`
-                }
+                },
+                "g8": {
+                    "gmove": `number.${this.ld24xxName}_g8_move_threshold`,
+                    "gmoveenergie": `sensor.${this.ld24xxName}_g8_move_energy`,
+                    "gstill": `number.${this.ld24xxName}_g8_still_threshold`,
+                    "gstillenergie": `sensor.${this.ld24xxName}_g8_still_energy`
+                  }
             }
           };
           
@@ -280,9 +296,10 @@ constructor() {
             const zone1 : number = Number(this.hass.states[ld24xx.zone1End]?.state)
             const zone2 : number = Number(this.hass.states[ld24xx.zone2End]?.state)
             const zone3 : number = Number(this.hass.states[ld24xx.zone3End]?.state)
-
+            const g4MoveEnergie: number = 310 - (Number(this.hass.states[ld24xx.gates.g4.gmoveenergie]?.state) * 3.1);
+            const g5MoveEnergie: number = 310 - (Number(this.hass.states[ld24xx.gates.g5.gmoveenergie]?.state) * 3.1);
             return html`
-            <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --slider-height: ${sliderHeight}px;">
+            <ha-card style="--card-width: ${cardWidthPadding}px;--slider-width: ${sliderWidth}px; --halfsliderwidth: ${slider}px; --slider-height: ${sliderHeight}px;">
           
             <svg version="1.1"  id="scg  header" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                 viewBox="0 0 402 60" style="enable-background:new 0 0 402 60;" xml:space="preserve">
@@ -696,270 +713,375 @@ constructor() {
             <hr>
 
         <!-- ###########################################################    move_gates_section    ########################################################### -->
+        
+       
+       
+       
         ${this._show_gmove == true ? html`
-        <div class="gates-container">
+
+        <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                viewBox="0 0 400 360" style="enable-background:new 0 0 400 400;" xml:space="preserve">
+            <foreignobject transform="matrix(1 0 0 1 0 0)"    width="400" height="400"">  
+            <div class="gates-container">
             ${Object.keys(deviceMap).map((gateKey, index) => {
-            const gate = deviceMap[gateKey];
-            const gMove= gate.gmove;
-            const GMoveStates = this.hass.states[gate.gmove]; 
-            const GMoveState = parseInt(GMoveStates?.state) || 0;
-            const gMoveEnergieStates = this.hass.states[gate.gmoveenergie];
-            const gMoveEnergieState = parseInt(gMoveEnergieStates?.state) || 0;
-            return gMove ? html`
+                const gate = deviceMap[gateKey];
+                const gMove = gate.gmove;
+                const GMoveStates = this.hass.states[gate.gmove]; 
+                const GMoveState = parseInt(GMoveStates?.state) || 0;
+                const gMoveEnergieStates = this.hass.states[gate.gmoveenergie];
+                const gMoveEnergieState = parseInt(gMoveEnergieStates?.state) || 0;
+            
+                const isLastGate = index === Object.keys(deviceMap).length - 1;
+            
+                const nextGateKey = Object.keys(deviceMap)[index + 1];
+                const nextGateMoveStates = nextGateKey ? this.hass.states[deviceMap[nextGateKey].gmove] : null;
+                const nextGateMoveState = parseInt(nextGateMoveStates?.state) || 0;
+                const nextGateMoveEnergieStates = nextGateKey ? this.hass.states[deviceMap[nextGateKey].gmoveenergie] : null;
+                const nextGateMoveEnergieState = parseInt(nextGateMoveEnergieStates?.state) || 0;
+            
+                return !isLastGate && gMove ? html`
+            
             <div class="inner-gates-container">
-                ${this.MovingDistanceNumber >= index + 1 ? html`
-                <div class="div-input-value">
+                ${this.MovingDistanceNumber >= index + 2 ? html`
+
+
+
+
                     <h2 style="${gMoveEnergieState >= GMoveState ? 'background-color: red; color: white;' : ''}">
-                        ${GMoveState}
+                    ${GMoveState}
                     </h2>
-                </div>
                 <div class="distance_sensor_value">
                     ${gMoveEnergieState}
                     <span style="font-size: smaller;">%</span>
                 </div>
-                <div class="range-holder" style="${this.MovingDistanceNumber >= index + 1 ? '' : 'display: none;'}">
-                    <input
-                    type="range"
+                
+                <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="visible" x="0px" y="0px"
+                    viewBox="0 0 48 310" style="enable-background:new 0 0 48 310;border: 1px solid var(--divider-color);" xml:space="preserve">
+                <style type="text/css">
+                    .st0red{fill:#E30613;}
+                    .linea{fill:none;stroke:purple;stroke-width:3;stroke-miterlimit:10;}
+                </style>
+                <polygon class="st0red" points="0,${310 - (gMoveEnergieState * 3.1) } 48,${310 - (nextGateMoveEnergieState * 3.1) } 48,310 0,310 "/>
+                <line id="linea" class="linea" x1="0" y1="${310 - (GMoveState * 3.1) }" x2="48" y2="${310 - (nextGateMoveState * 3.1) }"/>
+                <foreignobject transform="matrix(1 0 0 1 -12 -2)"    width="20px" height="310""> 
+                    <input 
+                    type="range" 
+                    orient="vertical"
                     min="0"
                     max="100"
                     .value="${GMoveState}"
-                    style="background-size: ${gMoveEnergieState}% 100%;"
                     @change=${e => this._setNumber(GMoveStates, e.target.value)}>
-                </div>
+                </foreignobject>
+                
+
+                </svg>
+
+
+
                 ` : html`
-                <div class="div-input-value"></div>
-                <div class="distance_sensor_value value-off">off</div>
-                <div class="slider-off">off</div>
+
+                        ${this.MovingDistanceNumber >= index  + 1 ? html`
+                            <div style="display:flex;flex-direction:row;">
+                                <div style="display:flex;flex-direction:column;">
+                                    <h2 style="${gMoveEnergieState >= GMoveState ? 'background-color: red; color: white;' : ''}">
+                                    ${GMoveState}
+                                        </h2>
+                                    <div class="distance_sensor_value">
+                                        ${gMoveEnergieState}
+                                        <span style="font-size: smaller;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;">
+                                    <h2 style="${nextGateMoveEnergieState >= nextGateMoveState  ? 'background-color: red; color: white;' : ''};left:-11px;">
+                                            ${nextGateMoveState}
+                                        </h2>
+                                    <div class="distance_sensor_value" style="left:-36px;">
+                                        ${nextGateMoveEnergieState}
+                                        <span style="font-size: smaller;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="visible" x="0px" y="0px"
+                                viewBox="0 0 48 310" style="enable-background:new 0 0 48 310;border: 1px solid var(--divider-color);" xml:space="preserve">
+                                <style type="text/css">
+                                    .st0red{fill:#E30613;}
+                                    .linea{fill:none;stroke:purple;stroke-width:3;stroke-miterlimit:10;}
+                                </style>
+                                <polygon class="st0red" points="0,${310 - (gMoveEnergieState * 3.1) } 48,${310 - (nextGateMoveEnergieState * 3.1) } 48,310 0,310 "/>
+                                <line id="linea" class="linea" x1="0" y1="${310 - (GMoveState * 3.1) }" x2="48" y2="${310 - (nextGateMoveState * 3.1) }"/>
+                            <foreignobject transform="matrix(1 0 0 1 -12 -2)"    width="20px" height="310""> 
+                                <input 
+                                type="range" 
+                                orient="vertical"
+                                min="0"
+                                max="100"
+                                .value="${GMoveState}"
+                                @change=${e => this._setNumber(GMoveStates, e.target.value)}>
+                            </foreignobject>
+                            <foreignobject transform="matrix(1 0 0 1 40 -2)"    width="20px" height="310""> 
+                                <input 
+                                type="range" 
+                                orient="vertical"
+                                min="0"
+                                max="100"
+                                .value="${nextGateMoveState }"
+                                @change=${e => this._setNumber(nextGateMoveStates, e.target.value)}>
+                            </foreignobject>
+                            
+
+                            </svg>
+                    ` : html`
+
+                            
+                            <div class="slider-off">off</div>
+                            
+                    `}
+
                 `}
-                <div class="g-name ${this.MovingDistanceNumber >= index + 1 ? '' : 'g-name-off'}" >G${index + 1}</div>
+                <div class="g-name ${this.MovingDistanceNumber >= index + 1 ? '' : 'g-name-off'}" data-gfrom="${index}" data-gto="${index + 1}">zone ${index + 1}</div>
             </div>
             ` : html`
             `;
             })}
-            </div>
-            <input 
-            type="range" 
-            id="n_move" 
-            min="0" 
-            max="8" 
-            .value="${this.MovingDistanceNumber}"  
-            @input=${this.onRangeInputMove} 
-            @change=${e => this._setNumber_direct_move(ld24xx.move_distance_n_gates, ld24xx.engineering_mode, e.target.value, ld24xx.zone1End, ld24xx.zone2End, ld24xx.zone3End)}> 
-
-            
-            
-            
-            
-            
-            <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-            viewBox="0 0 400 32" style="enable-background:new 0 0 400 32;" xml:space="preserve">
-            <g id="gruppo-ruler">
-                <foreignobject transform="matrix(1 0 0 1 -1 13.75)"    width="402" height="18">
-                    <div class="ruler-meter-div">
-                        <div class="ruler-meter-div-meter" style="width: ${movingDistancePerc}%">
-                        </div>
-                    </div>
-                </foreignobject>
-                <g id="ruler">
-                    <line class="st1" x1="0" y1="13.57" x2="0" y2="0.3"/>
-                    <line class="st1" x1="400" y1="13.57" x2="400" y2="0.3"/>
-                    <line class="st1" x1="100" y1="13.57" x2="100" y2="0.3"/>
-                    <line class="st1" x1="50" y1="13.57" x2="50" y2="0.3"/>
-                    <line class="st1" x1="150" y1="13.57" x2="150" y2="0.3"/>
-                    <line class="st1" x1="200" y1="13.57" x2="200" y2="0.3"/>
-                    <line class="st1" x1="300" y1="13.57" x2="300" y2="0.3"/>
-                    <line class="st1" x1="250" y1="13.57" x2="250" y2="0.3"/>
-                    <line class="st1" x1="350" y1="13.57" x2="350" y2="0.3"/>
-                    <line class="st1" x1="10" y1="13.57" x2="10" y2="7.06"/>
-                    <line class="st1" x1="20" y1="13.57" x2="20" y2="7.06"/>
-                    <line class="st1" x1="30" y1="13.57" x2="30" y2="7.06"/>
-                    <line class="st1" x1="40" y1="13.57" x2="40" y2="7.06"/>
-                    <line class="st1" x1="60" y1="13.57" x2="60" y2="7.06"/>
-                    <line class="st1" x1="70" y1="13.57" x2="70" y2="7.06"/>
-                    <line class="st1" x1="80" y1="13.57" x2="80" y2="7.06"/>
-                    <line class="st1" x1="90" y1="13.57" x2="90" y2="7.06"/>
-                    <line class="st1" x1="110" y1="13.57" x2="110" y2="7.06"/>
-                    <line class="st1" x1="120" y1="13.57" x2="120" y2="7.06"/>
-                    <line class="st1" x1="130" y1="13.57" x2="130" y2="7.06"/>
-                    <line class="st1" x1="140" y1="13.57" x2="140" y2="7.06"/>
-                    <line class="st1" x1="160" y1="13.57" x2="160" y2="7.06"/>
-                    <line class="st1" x1="170" y1="13.57" x2="170" y2="7.06"/>
-                    <line class="st1" x1="180" y1="13.57" x2="180" y2="7.06"/>
-                    <line class="st1" x1="190" y1="13.57" x2="190" y2="7.06"/>
-                    <line class="st1" x1="210" y1="13.57" x2="210" y2="7.06"/>
-                    <line class="st1" x1="220" y1="13.57" x2="220" y2="7.06"/>
-                    <line class="st1" x1="230" y1="13.57" x2="230" y2="7.06"/>
-                    <line class="st1" x1="240" y1="13.57" x2="240" y2="7.06"/>
-                    <line class="st1" x1="260" y1="13.57" x2="260" y2="7.06"/>
-                    <line class="st1" x1="270" y1="13.57" x2="270" y2="7.06"/>
-                    <line class="st1" x1="280" y1="13.57" x2="280" y2="7.06"/>
-                    <line class="st1" x1="290" y1="13.57" x2="290" y2="7.06"/>
-                    <line class="st1" x1="310" y1="13.57" x2="310" y2="7.06"/>
-                    <line class="st1" x1="320" y1="13.57" x2="320" y2="7.06"/>
-                    <line class="st1" x1="330" y1="13.57" x2="330" y2="7.06"/>
-                    <line class="st1" x1="340" y1="13.57" x2="340" y2="7.06"/>
-                    <line class="st1" x1="360" y1="13.57" x2="360" y2="7.06"/>
-                    <line class="st1" x1="370" y1="13.57" x2="370" y2="7.06"/>
-                    <line class="st1" x1="380" y1="13.57" x2="380" y2="7.06"/>
-                    <line class="st1" x1="390" y1="13.57" x2="390" y2="7.06"/>
-                </g>
-                <g id="misure">
-                    <text id="gate-1-text" transform="matrix(1.0488 0 0 1 10.2171 26.6973)" class="st2 st3 st4">${distanzaArray[0]}</text>
-                    <path class="st5" d="M41.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 60.2162 26.6973)" class="st2 st3 st4">${distanzaArray[1]}</text>
-                    <path class="st5" d="M91.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 110.2152 26.6973)" class="st2 st3 st4">${distanzaArray[2]}</text>
-                    <path class="st5" d="M141.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 160.2162 26.6973)" class="st2 st3 st4">${distanzaArray[3]}</text>
-                    <path class="st5" d="M191.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 210.2162 26.6973)" class="st2 st3 st4">${distanzaArray[4]}</text>
-                    <path class="st5" d="M241.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 260.2171 26.6973)" class="st2 st3 st4">${distanzaArray[5]}</text>
-                    <path class="st5" d="M291.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 310.2152 26.6973)" class="st2 st3 st4">${distanzaArray[6]}</text>
-                    <path class="st5" d="M341.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 360.2142 27.2822)" class="st2 st3 st4">${distanzaArray[7]}</text>
-                    <path class="st5" d="M391.56,24.31h1.78c3.68,0,6.65-2.98,6.65-6.65V15.9"/>
-                </g>
-            </g>
-            <line class="st1" x1="1" y1="13.8" x2="399.49" y2="13.8"/>
-            </svg>
+            </foreignobject>
+        </svg>
+        
+           
         <!-- ###########################################################    end move_gates_section    ########################################################### -->
 
             ` : html` `}
 
         <!-- ###########################################################    still_gates_section    ########################################################### -->
-            ${this._show_gstill == true ? html`
-                <div class="gates-container">
+        ${this._show_gstill == true ? html`
+
+        <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                viewBox="0 0 400 360" style="enable-background:new 0 0 400 400;" xml:space="preserve">
+            <foreignobject transform="matrix(1 0 0 1 0 0)"    width="400" height="400"">  
+            <div class="gates-container">
             ${Object.keys(deviceMap).map((gateKey, index) => {
-            const gate = deviceMap[gateKey];
-            const gStill= gate.gstill;
-            const GStillStates = this.hass.states[gate.gstill]; 
-            const GStillState = parseInt(GStillStates?.state) || 0;
-            const gStillEnergieStates = this.hass.states[gate.gstillenergie];
-            const gStillEnergieState = parseInt(gStillEnergieStates?.state) || 0;
-            return gStill ? html`
+                const gate = deviceMap[gateKey];
+                const gStill= gate.gstill;
+                const GStillStates = this.hass.states[gate.gstill]; 
+                const GStillState = parseInt(GStillStates?.state) || 0;
+                const gStillEnergieStates = this.hass.states[gate.gstillenergie];
+                const gStillEnergieState = parseInt(gStillEnergieStates?.state) || 0;
+            
+                const isLastGate = index === Object.keys(deviceMap).length - 1;
+            
+                const nextGateKey = Object.keys(deviceMap)[index + 1];
+                const nextGateStillStates = nextGateKey ? this.hass.states[deviceMap[nextGateKey].gstill] : null;
+                const nextGateStillState = parseInt(nextGateStillStates?.state) || 0;
+                const nextGateStillEnergieStates = nextGateKey ? this.hass.states[deviceMap[nextGateKey].gstillenergie] : null;
+                const nextGateStillEnergieState = parseInt(nextGateStillEnergieStates?.state) || 0;
+            
+                return !isLastGate && gStill ? html`
+            
             <div class="inner-gates-container">
-                ${this.StillDistanceNumber >= index + 1 ? html`
-                <div class="div-input-value">
+                ${this.MovingDistanceNumber >= index + 2 ? html`
+
+
+
+
                     <h2 style="${gStillEnergieState >= GStillState ? 'background-color: red; color: white;' : ''}">
-                        ${GStillState}
+                    ${GStillState}
                     </h2>
-                </div>
                 <div class="distance_sensor_value">
                     ${gStillEnergieState}
                     <span style="font-size: smaller;">%</span>
                 </div>
-                <div class="range-holder" style="${this.StillDistanceNumber >= index + 1 ? '' : 'display: none;'}">
-                    <input
-                    type="range"
+                
+                <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="visible" x="0px" y="0px"
+                    viewBox="0 0 48 310" style="enable-background:new 0 0 48 310;border: 1px solid var(--divider-color);" xml:space="preserve">
+                <style type="text/css">
+                    .st0red{fill:#E30613;}
+                    .linea{fill:none;stroke:purple;stroke-width:3;stroke-miterlimit:10;}
+                </style>
+                <polygon class="st0red" points="0,${310 - (gStillEnergieState * 3.1) } 48,${310 - (nextGateStillEnergieState * 3.1) } 48,310 0,310 "/>
+                <line id="linea" class="linea" x1="0" y1="${310 - (GStillState * 3.1) }" x2="48" y2="${310 - (nextGateStillState * 3.1) }"/>
+                <foreignobject transform="matrix(1 0 0 1 -12 -2)"    width="20px" height="310""> 
+                    <input 
+                    type="range" 
+                    orient="vertical"
                     min="0"
                     max="100"
                     .value="${GStillState}"
-                    style="background-size: ${gStillEnergieState}% 100%;"
                     @change=${e => this._setNumber(GStillStates, e.target.value)}>
-                </div>
+                </foreignobject>
+                
+
+                </svg>
+
+
+
                 ` : html`
-                <div class="div-input-value"></div>
-                <div class="distance_sensor_value value-off">off</div>
-                <div class="slider-off">off</div>
+
+                        ${this.MovingDistanceNumber >= index  + 1 ? html`
+                            <div style="display:flex;flex-direction:row;">
+                                <div style="display:flex;flex-direction:column;">
+                                    <h2 style="${gStillEnergieState >= GStillState ? 'background-color: red; color: white;' : ''}">
+                                    ${GStillState}
+                                        </h2>
+                                    <div class="distance_sensor_value">
+                                        ${gStillEnergieState}
+                                        <span style="font-size: smaller;">%</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;">
+                                    <h2 style="${nextGateStillEnergieState >= nextGateStillState  ? 'background-color: red; color: white;' : ''};left:-11px;">
+                                            ${nextGateStillState}
+                                        </h2>
+                                    <div class="distance_sensor_value" style="left:-36px;">
+                                        ${nextGateStillEnergieState}
+                                        <span style="font-size: smaller;">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="visible" x="0px" y="0px"
+                                viewBox="0 0 48 310" style="enable-background:new 0 0 48 310;border: 1px solid var(--divider-color);" xml:space="preserve">
+                                <style type="text/css">
+                                    .st0red{fill:#E30613;}
+                                    .linea{fill:none;stroke:purple;stroke-width:3;stroke-miterlimit:10;}
+                                </style>
+                                <polygon class="st0red" points="0,${310 - (gStillEnergieState * 3.1) } 48,${310 - (nextGateStillEnergieState * 3.1) } 48,310 0,310 "/>
+                                <line id="linea" class="linea" x1="0" y1="${310 - (GStillState * 3.1) }" x2="48" y2="${310 - (nextGateStillState * 3.1) }"/>
+                            <foreignobject transform="matrix(1 0 0 1 -12 -2)"    width="20px" height="310""> 
+                                <input 
+                                type="range" 
+                                orient="vertical"
+                                min="0"
+                                max="100"
+                                .value="${GStillState}"
+                                @change=${e => this._setNumber(GStillStates, e.target.value)}>
+                            </foreignobject>
+                            <foreignobject transform="matrix(1 0 0 1 40 -2)"    width="20px" height="310""> 
+                                <input 
+                                type="range" 
+                                orient="vertical"
+                                min="0"
+                                max="100"
+                                .value="${nextGateStillState }"
+                                @change=${e => this._setNumber(nextGateStillStates, e.target.value)}>
+                            </foreignobject>
+                            
+
+                            </svg>
+                    ` : html`
+
+                            
+                            <div class="slider-off">off</div>
+                            
+                    `}
+
                 `}
-                <div class="g-name ${this.StillDistanceNumber >= index + 1 ? '' : 'g-name-off'}" >G${index + 1}</div>
+                <div class="g-name ${this.MovingDistanceNumber >= index + 1 ? '' : 'g-name-off'}" data-gfrom="${index}" data-gto="${index + 1}">zone ${index + 1}</div>
             </div>
             ` : html`
             `;
             })}
-            </div>
-            <input 
-            type="range" 
-            id="n_still" 
-            min="0" 
-            max="8" 
-            .value="${this.StillDistanceNumber}"  
-            @input=${this.onRangeInputStill} 
-            @change=${e => this._setNumber_direct_still(ld24xx.still_distance_n_gates, ld24xx.engineering_mode, e.target.value)}> 
+            </foreignobject>
+        </svg>
 
-            
-            
-            
-           
-            
-            <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-            viewBox="0 0 400 32" style="enable-background:new 0 0 400 32;" xml:space="preserve">
-            <g id="gruppo-ruler">
-                <foreignobject transform="matrix(1 0 0 1 -1 13.75)"    width="402" height="18">
-                    <div class="ruler-meter-div">
-                        <div class="ruler-meter-div-meter" style="width: ${stillDistancePerc}%;">
-                        </div>
-                    </div>
-                </foreignobject>
-                <g id="ruler">
-                    <line class="st1" x1="0" y1="13.57" x2="0" y2="0.3"/>
-                    <line class="st1" x1="400" y1="13.57" x2="400" y2="0.3"/>
-                    <line class="st1" x1="100" y1="13.57" x2="100" y2="0.3"/>
-                    <line class="st1" x1="50" y1="13.57" x2="50" y2="0.3"/>
-                    <line class="st1" x1="150" y1="13.57" x2="150" y2="0.3"/>
-                    <line class="st1" x1="200" y1="13.57" x2="200" y2="0.3"/>
-                    <line class="st1" x1="300" y1="13.57" x2="300" y2="0.3"/>
-                    <line class="st1" x1="250" y1="13.57" x2="250" y2="0.3"/>
-                    <line class="st1" x1="350" y1="13.57" x2="350" y2="0.3"/>
-                    <line class="st1" x1="10" y1="13.57" x2="10" y2="7.06"/>
-                    <line class="st1" x1="20" y1="13.57" x2="20" y2="7.06"/>
-                    <line class="st1" x1="30" y1="13.57" x2="30" y2="7.06"/>
-                    <line class="st1" x1="40" y1="13.57" x2="40" y2="7.06"/>
-                    <line class="st1" x1="60" y1="13.57" x2="60" y2="7.06"/>
-                    <line class="st1" x1="70" y1="13.57" x2="70" y2="7.06"/>
-                    <line class="st1" x1="80" y1="13.57" x2="80" y2="7.06"/>
-                    <line class="st1" x1="90" y1="13.57" x2="90" y2="7.06"/>
-                    <line class="st1" x1="110" y1="13.57" x2="110" y2="7.06"/>
-                    <line class="st1" x1="120" y1="13.57" x2="120" y2="7.06"/>
-                    <line class="st1" x1="130" y1="13.57" x2="130" y2="7.06"/>
-                    <line class="st1" x1="140" y1="13.57" x2="140" y2="7.06"/>
-                    <line class="st1" x1="160" y1="13.57" x2="160" y2="7.06"/>
-                    <line class="st1" x1="170" y1="13.57" x2="170" y2="7.06"/>
-                    <line class="st1" x1="180" y1="13.57" x2="180" y2="7.06"/>
-                    <line class="st1" x1="190" y1="13.57" x2="190" y2="7.06"/>
-                    <line class="st1" x1="210" y1="13.57" x2="210" y2="7.06"/>
-                    <line class="st1" x1="220" y1="13.57" x2="220" y2="7.06"/>
-                    <line class="st1" x1="230" y1="13.57" x2="230" y2="7.06"/>
-                    <line class="st1" x1="240" y1="13.57" x2="240" y2="7.06"/>
-                    <line class="st1" x1="260" y1="13.57" x2="260" y2="7.06"/>
-                    <line class="st1" x1="270" y1="13.57" x2="270" y2="7.06"/>
-                    <line class="st1" x1="280" y1="13.57" x2="280" y2="7.06"/>
-                    <line class="st1" x1="290" y1="13.57" x2="290" y2="7.06"/>
-                    <line class="st1" x1="310" y1="13.57" x2="310" y2="7.06"/>
-                    <line class="st1" x1="320" y1="13.57" x2="320" y2="7.06"/>
-                    <line class="st1" x1="330" y1="13.57" x2="330" y2="7.06"/>
-                    <line class="st1" x1="340" y1="13.57" x2="340" y2="7.06"/>
-                    <line class="st1" x1="360" y1="13.57" x2="360" y2="7.06"/>
-                    <line class="st1" x1="370" y1="13.57" x2="370" y2="7.06"/>
-                    <line class="st1" x1="380" y1="13.57" x2="380" y2="7.06"/>
-                    <line class="st1" x1="390" y1="13.57" x2="390" y2="7.06"/>
-                </g>
-                <g id="misure">
-                    <text id="gate-1-text" transform="matrix(1.0488 0 0 1 10.2171 26.6973)" class="st2 st3 st4">${distanzaArray[0]}</text>
-                    <path class="st5" d="M41.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 60.2162 26.6973)" class="st2 st3 st4">${distanzaArray[1]}</text>
-                    <path class="st5" d="M91.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 110.2152 26.6973)" class="st2 st3 st4">${distanzaArray[2]}</text>
-                    <path class="st5" d="M141.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 160.2162 26.6973)" class="st2 st3 st4">${distanzaArray[3]}</text>
-                    <path class="st5" d="M191.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 210.2162 26.6973)" class="st2 st3 st4">${distanzaArray[4]}</text>
-                    <path class="st5" d="M241.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 260.2171 26.6973)" class="st2 st3 st4">${distanzaArray[5]}</text>
-                    <path class="st5" d="M291.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 310.2152 26.6973)" class="st2 st3 st4">${distanzaArray[6]}</text>
-                    <path class="st5" d="M341.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
-                    <text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 360.2142 27.2822)" class="st2 st3 st4">${distanzaArray[7]}</text>
-                    <path class="st5" d="M391.56,24.31h1.78c3.68,0,6.65-2.98,6.65-6.65V15.9"/>
-                </g>
-            </g>
-            <line class="st1" x1="1" y1="13.8" x2="399.49" y2="13.8"/>
-            </svg>
+
+
+
         <!-- ###########################################################    end still_gates_section    ########################################################### -->
         ` : html` `}
 
+ 
+
+
+
+
+
+        </div>
+        <input 
+        type="range"
+        style="margin-inline: 20px;"
+        id="n_move" 
+        min="0" 
+        max="8" 
+        .value="${this.MovingDistanceNumber}"  
+        @input=${this.onRangeInputMove} 
+        @change=${e => this._setNumber_direct_move(ld24xx.move_distance_n_gates, ld24xx.still_distance_n_gates, ld24xx.engineering_mode, e.target.value, ld24xx.zone1End, ld24xx.zone2End, ld24xx.zone3End)}> 
+
+        
+        
+        
+        
+        
+        <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        viewBox="0 0 400 32" style="enable-background:new 0 0 400 32;    margin-inline: 20px;" xml:space="preserve">
+        <g id="gruppo-ruler">
+            <foreignobject transform="matrix(1 0 0 1 -1 13.75)"    width="402" height="18">
+                <div class="ruler-meter-div">
+                    <div class="ruler-meter-div-meter" style="width: ${movingDistancePerc}%">
+                    </div>
+                </div>
+            </foreignobject>
+            <g id="ruler">
+                <line class="st1" x1="0" y1="13.57" x2="0" y2="0.3"/>
+                <line class="st1" x1="400" y1="13.57" x2="400" y2="0.3"/>
+                <line class="st1" x1="100" y1="13.57" x2="100" y2="0.3"/>
+                <line class="st1" x1="50" y1="13.57" x2="50" y2="0.3"/>
+                <line class="st1" x1="150" y1="13.57" x2="150" y2="0.3"/>
+                <line class="st1" x1="200" y1="13.57" x2="200" y2="0.3"/>
+                <line class="st1" x1="300" y1="13.57" x2="300" y2="0.3"/>
+                <line class="st1" x1="250" y1="13.57" x2="250" y2="0.3"/>
+                <line class="st1" x1="350" y1="13.57" x2="350" y2="0.3"/>
+                <line class="st1" x1="10" y1="13.57" x2="10" y2="7.06"/>
+                <line class="st1" x1="20" y1="13.57" x2="20" y2="7.06"/>
+                <line class="st1" x1="30" y1="13.57" x2="30" y2="7.06"/>
+                <line class="st1" x1="40" y1="13.57" x2="40" y2="7.06"/>
+                <line class="st1" x1="60" y1="13.57" x2="60" y2="7.06"/>
+                <line class="st1" x1="70" y1="13.57" x2="70" y2="7.06"/>
+                <line class="st1" x1="80" y1="13.57" x2="80" y2="7.06"/>
+                <line class="st1" x1="90" y1="13.57" x2="90" y2="7.06"/>
+                <line class="st1" x1="110" y1="13.57" x2="110" y2="7.06"/>
+                <line class="st1" x1="120" y1="13.57" x2="120" y2="7.06"/>
+                <line class="st1" x1="130" y1="13.57" x2="130" y2="7.06"/>
+                <line class="st1" x1="140" y1="13.57" x2="140" y2="7.06"/>
+                <line class="st1" x1="160" y1="13.57" x2="160" y2="7.06"/>
+                <line class="st1" x1="170" y1="13.57" x2="170" y2="7.06"/>
+                <line class="st1" x1="180" y1="13.57" x2="180" y2="7.06"/>
+                <line class="st1" x1="190" y1="13.57" x2="190" y2="7.06"/>
+                <line class="st1" x1="210" y1="13.57" x2="210" y2="7.06"/>
+                <line class="st1" x1="220" y1="13.57" x2="220" y2="7.06"/>
+                <line class="st1" x1="230" y1="13.57" x2="230" y2="7.06"/>
+                <line class="st1" x1="240" y1="13.57" x2="240" y2="7.06"/>
+                <line class="st1" x1="260" y1="13.57" x2="260" y2="7.06"/>
+                <line class="st1" x1="270" y1="13.57" x2="270" y2="7.06"/>
+                <line class="st1" x1="280" y1="13.57" x2="280" y2="7.06"/>
+                <line class="st1" x1="290" y1="13.57" x2="290" y2="7.06"/>
+                <line class="st1" x1="310" y1="13.57" x2="310" y2="7.06"/>
+                <line class="st1" x1="320" y1="13.57" x2="320" y2="7.06"/>
+                <line class="st1" x1="330" y1="13.57" x2="330" y2="7.06"/>
+                <line class="st1" x1="340" y1="13.57" x2="340" y2="7.06"/>
+                <line class="st1" x1="360" y1="13.57" x2="360" y2="7.06"/>
+                <line class="st1" x1="370" y1="13.57" x2="370" y2="7.06"/>
+                <line class="st1" x1="380" y1="13.57" x2="380" y2="7.06"/>
+                <line class="st1" x1="390" y1="13.57" x2="390" y2="7.06"/>
+            </g>
+            <g id="misure">
+                <text id="gate-1-text" transform="matrix(1.0488 0 0 1 10.2171 26.6973)" class="st2 st3 st4">${distanzaArray[0]}</text>
+                <path class="st5" d="M41.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000172403478865654996700000009434690586403883428_" transform="matrix(1.0488 0 0 1 60.2162 26.6973)" class="st2 st3 st4">${distanzaArray[1]}</text>
+                <path class="st5" d="M91.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000174604340524944137280000015794942522531559070_" transform="matrix(1.0488 0 0 1 110.2152 26.6973)" class="st2 st3 st4">${distanzaArray[2]}</text>
+                <path class="st5" d="M141.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000099625697548038854210000013000206721289728953_" transform="matrix(1.0488 0 0 1 160.2162 26.6973)" class="st2 st3 st4">${distanzaArray[3]}</text>
+                <path class="st5" d="M191.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000070815017703564489300000010520145297064408724_" transform="matrix(1.0488 0 0 1 210.2162 26.6973)" class="st2 st3 st4">${distanzaArray[4]}</text>
+                <path class="st5" d="M241.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000005964308175057680080000014454426573449790897_" transform="matrix(1.0488 0 0 1 260.2171 26.6973)" class="st2 st3 st4">${distanzaArray[5]}</text>
+                <path class="st5" d="M291.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000085951868237978151280000003226438313236816520_" transform="matrix(1.0488 0 0 1 310.2152 26.6973)" class="st2 st3 st4">${distanzaArray[6]}</text>
+                <path class="st5" d="M341.56,23.73h1.78c3.68,0,6.65-2.98,6.65-6.65v-1.76"/>
+                <text id="gate-1-text_00000053520815625960183270000016495147803014316929_" transform="matrix(1.0488 0 0 1 360.2142 27.2822)" class="st2 st3 st4">${distanzaArray[7]}</text>
+                <path class="st5" d="M391.56,24.31h1.78c3.68,0,6.65-2.98,6.65-6.65V15.9"/>
+            </g>
+        </g>
+        <line class="st1" x1="1" y1="13.8" x2="399.49" y2="13.8"/>
+        </svg>
         ` : html` `} 
         <!-- fine blocco engineering mode -->
         ` : html`
@@ -972,6 +1094,29 @@ constructor() {
             </ha-card>
 `;
     }
+
+    generaCurva(variabile_1, variabile_2, variabile_3, variabile_4, variabile_5, variabile_6) {
+        // Calcola i punti di controllo intermedi
+        const controllo1 = { x: 0, y: variabile_1 };
+        const controllo2 = { x: 100, y: variabile_2 };
+        const controllo3 = { x: 200, y: variabile_3 };
+        const controllo4 = { x: 300, y: variabile_4 };
+        const controllo5 = { x: 400, y: variabile_5 };
+        const controllo6 = { x: 500, y: variabile_6 };
+      
+        // Crea il percorso SVG utilizzando i punti di controllo
+        const percorso = `M0 ${variabile_1} C${controllo1.x} ${controllo1.y}, ${controllo2.x} ${controllo2.y}, 100 ${variabile_2} C${controllo2.x} ${controllo2.y}, ${controllo3.x} ${controllo3.y}, 200 ${variabile_3} C${controllo3.x} ${controllo3.y}, ${controllo4.x} ${controllo4.y}, 300 ${variabile_4} C${controllo4.x} ${controllo4.y}, ${controllo5.x} ${controllo5.y}, 400 ${variabile_5} Q${controllo5.x} ${controllo5.y}, 500 ${variabile_6}`;
+      
+        // Crea l'elemento path e imposta gli attributi
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", percorso);
+        path.setAttribute("stroke", "black");
+        path.setAttribute("fill", "transparent");
+      
+        // Aggiungi il percorso al contenitore SVG
+        const svgContainer = this.shadowRoot.getElementById("svgContainer");
+        svgContainer.appendChild(path);
+      }
     
 
     getBrowserName() {
@@ -1079,7 +1224,7 @@ constructor() {
         }, 2000); // 2000 millisecondi equivalgono a 2 secondi
     }
       
-      _setNumber_direct_move(entity_id, engineering_switch, value, number1, number2, number3) {
+      _setNumber_direct_move(entity_id, entity_id_still, engineering_switch, value, number1, number2, number3) {
         // Assicurati che il valore non sia inferiore a 2
         const newValue = Math.max(2, parseFloat(value));
     
@@ -1094,6 +1239,10 @@ constructor() {
         // Chiama il servizio per impostare il nuovo valore
         this.hass.callService("number", "set_value", {
             entity_id: entity_id,
+            value: newValue
+        });
+        this.hass.callService("number", "set_value", {
+            entity_id: entity_id_still,
             value: newValue
         });
         this.requestUpdate();
