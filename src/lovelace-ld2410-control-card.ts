@@ -107,6 +107,22 @@ export class Ld2410CustomCard extends LitElement {
   render() {
     const cardWidth = this.getBoundingClientRect().width;
     const cardWidthPadding = cardWidth - 52;
+
+    interface Gate {
+      gmove: string;
+      gmoveenergie: string;
+      gstill: string;
+      gstillenergie: string;
+    }
+
+    interface Gates {
+      [key: string]: Gate;
+    }
+
+    interface LD24xx {
+      // ... (altre proprietà)
+      gates: Gates;
+    }
     const ld24xx = {
       engineering_mode: `switch.${this.ld24xxName}_engineering_mode`,
       precence_sensor: `binary_sensor.${this.ld24xxName}_presence`,
@@ -141,63 +157,61 @@ export class Ld2410CustomCard extends LitElement {
       zone1occupancy: `binary_sensor.${this.ld24xxName}_zone_1_occupancy`,
       zone2occupancy: `binary_sensor.${this.ld24xxName}_zone_2_occupancy`,
       zone3occupancy: `binary_sensor.${this.ld24xxName}_zone_3_occupancy`,
-      gates: {
-        g0: {
-          gmove: `number.${this.ld24xxName}_g0_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g0_move_energy`,
-          gstill: `number.${this.ld24xxName}_g0_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g0_still_energy`,
-        },
-        g1: {
-          gmove: `number.${this.ld24xxName}_g1_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g1_move_energy`,
-          gstill: `number.${this.ld24xxName}_g1_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g1_still_energy`,
-        },
-        g2: {
-          gmove: `number.${this.ld24xxName}_g2_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g2_move_energy`,
-          gstill: `number.${this.ld24xxName}_g2_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g2_still_energy`,
-        },
-        g3: {
-          gmove: `number.${this.ld24xxName}_g3_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g3_move_energy`,
-          gstill: `number.${this.ld24xxName}_g3_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g3_still_energy`,
-        },
-        g4: {
-          gmove: `number.${this.ld24xxName}_g4_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g4_move_energy`,
-          gstill: `number.${this.ld24xxName}_g4_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g4_still_energy`,
-        },
-        g5: {
-          gmove: `number.${this.ld24xxName}_g5_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g5_move_energy`,
-          gstill: `number.${this.ld24xxName}_g5_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g5_still_energy`,
-        },
-        g6: {
-          gmove: `number.${this.ld24xxName}_g6_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g6_move_energy`,
-          gstill: `number.${this.ld24xxName}_g6_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g6_still_energy`,
-        },
-        g7: {
-          gmove: `number.${this.ld24xxName}_g7_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g7_move_energy`,
-          gstill: `number.${this.ld24xxName}_g7_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g7_still_energy`,
-        },
-        g8: {
-          gmove: `number.${this.ld24xxName}_g8_move_threshold`,
-          gmoveenergie: `sensor.${this.ld24xxName}_g8_move_energy`,
-          gstill: `number.${this.ld24xxName}_g8_still_threshold`,
-          gstillenergie: `sensor.${this.ld24xxName}_g8_still_energy`,
-        },
-      },
+
+      gates: {},
     };
+
+    if (this.hass.states[`sensor.${this.ld24xxName}_array_sensor_data`]) {
+      if (
+        this.hass.states[`sensor.${this.ld24xxName}_array_sensor_data`]
+          ?.state !== "engineering mode off"
+      ) {
+        const arraySensorDataString =
+          this.hass.states[`sensor.${this.ld24xxName}_array_sensor_data`]
+            ?.state;
+        const arraySensorData = JSON.parse(arraySensorDataString);
+        // Set gates based on array_sensor_data
+        for (let i = 0; i <= 8; i++) {
+          const moveIndex = i * 2; // Indice per gmoveenergie
+          const stillIndex = moveIndex + 1; // Indice per gstillenergie
+
+          ld24xx.gates[`g${i}`] = {
+            gmove: `number.${this.ld24xxName}_g${i}_move_threshold`,
+            gmoveenergie:
+              isNaN(arraySensorData[moveIndex]) ||
+              arraySensorData[moveIndex] > 100
+                ? 0
+                : Math.min(arraySensorData[moveIndex], 100),
+
+            gstill: `number.${this.ld24xxName}_g${i}_still_threshold`,
+            gstillenergie:
+              isNaN(arraySensorData[stillIndex]) ||
+              arraySensorData[stillIndex] > 100
+                ? 0
+                : Math.min(arraySensorData[stillIndex], 100),
+          };
+        }
+      } else {
+        for (let i = 0; i <= 8; i++) {
+          ld24xx.gates[`g${i}`] = {
+            gmove: `number.${this.ld24xxName}_g${i}_move_threshold`,
+            gmoveenergie: "0",
+            gstill: `number.${this.ld24xxName}_g${i}_still_threshold`,
+            gstillenergie: "0",
+          };
+        }
+      }
+    } else {
+      // Set default gates
+      for (let i = 0; i <= 8; i++) {
+        ld24xx.gates[`g${i}`] = {
+          gmove: `number.${this.ld24xxName}_g${i}_move_threshold`,
+          gmoveenergie: `sensor.${this.ld24xxName}_g${i}_move_energy`,
+          gstill: `number.${this.ld24xxName}_g${i}_still_threshold`,
+          gstillenergie: `sensor.${this.ld24xxName}_g${i}_still_energy`,
+        };
+      }
+    }
 
     const deviceMap = ld24xx.gates;
     const PrecenceSensorState = this.hass.states[ld24xx.precence_sensor]?.state;
@@ -871,9 +885,7 @@ export class Ld2410CustomCard extends LitElement {
                                     id="gate-6_00000000190920724572184100000018113593952632234386_"
                                     transform="matrix(1.0438 0 0 1 0.7812 14.1904)"
                                     class="meter-principale-testo"
-                                  >
-                                    ${testoSVG}
-                                  </text>
+                                  >${testoSVG}</text>
                                   <path
                                     id="tacciato6_00000026858519343495812740000007173033270969586816_"
                                     class="meter-principale-shape"
@@ -1135,9 +1147,9 @@ export class Ld2410CustomCard extends LitElement {
               const gMove = gate.gmove;
               const GMoveStates = this.hass.states[gate.gmove];
               const GMoveState = parseInt(GMoveStates?.state) || 0;
-              const gMoveEnergieStates = this.hass.states[gate.gmoveenergie];
-              const gMoveEnergieState =
-                parseInt(gMoveEnergieStates?.state) || 0;
+              const gMoveEnergieState = isNaN(gate.gmoveenergie)
+                ? 0
+                : gate.gmoveenergie;
 
               const isLastGate = index === Object.keys(deviceMap).length - 1;
 
@@ -1147,11 +1159,11 @@ export class Ld2410CustomCard extends LitElement {
                 : null;
               const nextGateMoveState =
                 parseInt(nextGateMoveStates?.state) || 0;
-              const nextGateMoveEnergieStates = nextGateKey
-                ? this.hass.states[deviceMap[nextGateKey].gmoveenergie]
-                : null;
-              const nextGateMoveEnergieState =
-                parseInt(nextGateMoveEnergieStates?.state) || 0;
+              const nextGateMoveEnergieState = isNaN(
+                deviceMap[nextGateKey]?.gmoveenergie
+              )
+                ? 0
+                : deviceMap[nextGateKey].gmoveenergie;
 
               return !isLastGate && gMove
                 ? html`
@@ -1317,10 +1329,9 @@ export class Ld2410CustomCard extends LitElement {
               const gStill = gate.gstill;
               const GStillStates = this.hass.states[gate.gstill];
               const GStillState = parseInt(GStillStates?.state) || 0;
-              const gStillEnergieStates = this.hass.states[gate.gstillenergie];
-              const gStillEnergieState =
-                parseInt(gStillEnergieStates?.state) || 0;
-
+              const gStillEnergieState = isNaN(gate.gstillenergie)
+                ? 0
+                : gate.gstillenergie;
               const isLastGate = index === Object.keys(deviceMap).length - 1;
 
               const nextGateKey = Object.keys(deviceMap)[index + 1];
@@ -1332,8 +1343,11 @@ export class Ld2410CustomCard extends LitElement {
               const nextGateStillEnergieStates = nextGateKey
                 ? this.hass.states[deviceMap[nextGateKey].gstillenergie]
                 : null;
-              const nextGateStillEnergieState =
-                parseInt(nextGateStillEnergieStates?.state) || 0;
+              const nextGateStillEnergieState = isNaN(
+                deviceMap[nextGateKey]?.gstillenergie
+              )
+                ? 0
+                : deviceMap[nextGateKey].gstillenergie;
 
               return !isLastGate && gStill
                 ? html`
@@ -1630,36 +1644,6 @@ export class Ld2410CustomCard extends LitElement {
                 } 
             </ha-card>
 `;
-  }
-
-  generaCurva(
-    variabile_1,
-    variabile_2,
-    variabile_3,
-    variabile_4,
-    variabile_5,
-    variabile_6
-  ) {
-    // Calcola i punti di controllo intermedi
-    const controllo1 = { x: 0, y: variabile_1 };
-    const controllo2 = { x: 100, y: variabile_2 };
-    const controllo3 = { x: 200, y: variabile_3 };
-    const controllo4 = { x: 300, y: variabile_4 };
-    const controllo5 = { x: 400, y: variabile_5 };
-    const controllo6 = { x: 500, y: variabile_6 };
-
-    // Crea il percorso SVG utilizzando i punti di controllo
-    const percorso = `M0 ${variabile_1} C${controllo1.x} ${controllo1.y}, ${controllo2.x} ${controllo2.y}, 100 ${variabile_2} C${controllo2.x} ${controllo2.y}, ${controllo3.x} ${controllo3.y}, 200 ${variabile_3} C${controllo3.x} ${controllo3.y}, ${controllo4.x} ${controllo4.y}, 300 ${variabile_4} C${controllo4.x} ${controllo4.y}, ${controllo5.x} ${controllo5.y}, 400 ${variabile_5} Q${controllo5.x} ${controllo5.y}, 500 ${variabile_6}`;
-
-    // Crea l'elemento path e imposta gli attributi
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", percorso);
-    path.setAttribute("stroke", "black");
-    path.setAttribute("fill", "transparent");
-
-    // Aggiungi il percorso al contenitore SVG
-    const svgContainer = this.shadowRoot.getElementById("svgContainer");
-    svgContainer.appendChild(path);
   }
 
   getBrowserName() {
