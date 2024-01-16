@@ -16,7 +16,7 @@ It is also modular, users will be able to add sensors and modules as they wish.
 on the store's git there are codes for some of the most common sensors.
 Furthermore, you will actively contribute to the project which required many hours of development and testing.
 
-[![firmware](./example/firmware.png)](https://github.com/papperone/ESPresenceLD)  [![shop](./example/shop.png)](https://www.tindie.com/products/33322/)
+[![firmware](./example/firmware.png)](https://github.com/papperone/ESPresenceLD)  [![shop](./example/store.png)](https://www.tindie.com/products/33322/)
 
 <hr>
 
