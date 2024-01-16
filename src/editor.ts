@@ -262,13 +262,57 @@ class LgD2410CardEditor extends LitElement {
 
   render() {
     return html`
+
+
+      <div class="container">
       ${this.builLIst(this._config.devices_name)}
       ${this.selectLDdevice(this._config.devices_name)}
+      <br>
+      <hr class="divider" />
+
+      <div class="div-button">
+        <button class="button" onclick="window.location.href='https://github.com/papperone/ESPresenceLD';"> firmware </button>
+        <button class="button" onclick="window.location.href='https://www.tindie.com/products/33322/';"> device </button>
+      </div>
+
+      <hr class="divider" />
+      <div class="text">please support our project:</div>
+      <div class="div-button">
+          <a href="https://www.buymeacoffee.com/madmicio" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style=";width: 18ch !important;" ></a>
+          <form action="https://www.paypal.com/donate" method="post" target="_top">
+          <input type="hidden" name="hosted_button_id" value="U5VQ9LHM82B7Q" />
+          <input type="image" src="https://pics.paypal.com/00/s/ODdjZjVlZjAtOWVmYS00NjQyLTkyZTUtNWQ3MmMzMmIxYTcx/file.PNG" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" style="width: 21ch;" />
+          <img alt="" border="0" src="https://www.paypal.com/en_IT/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+      </div>
+    </div>
     `;
   }
 
   static get styles() {
     return css`
+      .container {
+        width: 40ch;
+      }
+
+      .div-button {display:flex; 
+        flex-direction:row; 
+        justify-content:space-between;}
+
+        .divider {
+          border: 3px  var(--divider-color);
+          border-style: double;
+        }
+
+      button {
+        background: linear-gradient(180deg, var(--secondary-background-color) 0%, var(--secondary-background-color) 60%, var(--primary-background-color) 100%);
+        border-radius: 2.5ch;
+        width: 19ch;
+        height: 5ch;
+      }
+      .text {
+        margin-bottom:10px;
+      }
       .list {
         display: flex;
         flex-direction: row;

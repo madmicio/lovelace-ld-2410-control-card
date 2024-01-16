@@ -31,7 +31,7 @@ const windowWithCards = window as unknown as WindowWithCards;
 windowWithCards.customCards = windowWithCards.customCards || [];
 windowWithCards.customCards.push({
   type: CARD_TAG_NAME,
-  name: "LD2410 Control Card pippo",
+  name: "LD2410 Control Card",
   preview: true,
   description: "Control card for LD2410 Device",
 });
