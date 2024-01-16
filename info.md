@@ -1,9 +1,30 @@
 # lovelace ld2410 control-card
-Custom control card for Hi-Link LD2410 Presence Detection
+### Custom control card for Hi-Link LD2410 Presence Detection
+<hr>
+This card is optimized for our firmware and hardware.
+the hardware was designed by Giovanni Castania. can be purchased on the store.
+
+why choose our firmware?
+Our firmware is an optimization of the esphome ld2410 project.
+we reduced the entities created by 20%. added additional zones for your automations.
+Bluetooth adopting will create a name structure suitable for the card to recognize the various LD24XXs within your Home Assistant system.
+
+why buy our hardware?
+The entire hardware package is optimized. arrives with preloaded firmware and is ready for adoption.
+everything will work without problems.
+It is also modular, users will be able to add sensors and modules as they wish.
+on the store's git there are codes for some of the most common sensors.
+Furthermore, you will actively contribute to the project which required many hours of development and testing.
+
+[![firmware](./example/firmware.png)](https://github.com/papperone/ESPresenceLD)  [![shop](./example/shop.png)](https://www.tindie.com/products/33322/)
+
+<hr>
+
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 [![buymeacoffee_badge](https://img.shields.io/badge/Donate-buymeacoffe-ff813f?style=flat)](https://www.buymeacoffee.com/madmicio)
+[![PayPal.Me][paypal_me_shield]][paypal_me]
 
 
 ![image of the LD2410 card](./example/main.png)
@@ -78,3 +99,6 @@ for your extra automations our project has a slider for the configuration of thr
 
 ### Options Config:
 ![image of the LD2410 card](./example/options.png)
+
+[paypal_me]: https://paypal.me/maurizioarci
+[paypal_me_shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
