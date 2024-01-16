@@ -100,5 +100,5 @@ for your extra automations our project has a slider for the configuration of thr
 ### Options Config:
 ![image of the LD2410 card](./example/options.png)
 
-[paypal_me]: paypal.me/maurizioarci
+[paypal_me]: https://paypal.me/maurizioarci
 [paypal_me_shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
