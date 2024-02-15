@@ -1,5 +1,6 @@
 # lovelace ld2410 control-card
 ### Custom control card for Hi-Link LD2410 Presence Detection
+for stock esphome integration and our custom integration
 <hr>
 This card is optimized for our firmware and hardware.
 the hardware was designed by Giovanni Castania. can be purchased on the store.
