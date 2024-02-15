@@ -206,7 +206,7 @@ export class Ld2410CustomCard extends LitElement {
       for (let i = 0; i <= 8; i++) {
         ld24xx.gates[`g${i}`] = {
           gmove: `number.${this.ld24xxName}_g${i}_move_threshold`,
-          gmoveenergie1: this.hass.states[`sensor.${this.ld24xxName}_g${i}_move_energy`]?.state,
+          gmoveenergie: this.hass.states[`sensor.${this.ld24xxName}_g${i}_move_energy`]?.state,
           gstill: `number.${this.ld24xxName}_g${i}_still_threshold`,
           gstillenergie: this.hass.states[`sensor.${this.ld24xxName}_g${i}_still_energy`]?.state,
         };
