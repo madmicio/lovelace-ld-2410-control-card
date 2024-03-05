@@ -8,12 +8,6 @@ import { getdeviceName } from "./utils";
 import { HomeAssistantFixed, WindowWithCards } from "./types";
 import { CARD_TAG_NAME, CARD_VERSION, EDITOR_CARD_TAG_NAME } from "./const";
 
-const WideCardTEst = "v0.1";
-console.groupCollapsed(
-  "%c LD 2410 CARD %c " + WideCardTEst + " installed ",
-  "color: orange; font-weight: bold; background: black",
-  "color: green; font-weight: bold;"
-),
   console.log("Readme:", "https://github.com/madmicio"),
   console.groupEnd();
 
@@ -451,7 +445,7 @@ export class Ld2410CustomCard extends LitElement {
                 ${
                   this._show_options
                     ? html`
-                    <div style="font-size:10px">ver.: ${CARD_VERSION}</div>
+                    <div style="font-size:10px">version: ${CARD_VERSION}</div>
                         <div class="select-options-container">
                           <div class="select-options-item">
                             <div class="option-select-title">Baud Rate</div>
