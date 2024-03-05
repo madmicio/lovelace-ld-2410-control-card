@@ -142,7 +142,7 @@ export class Ld2410CustomCard extends LitElement {
       outPinStatus: `binary_sensor.${this.ld24xxName}_out_pin_presence_status`,
       presenceLed: `switch.${this.ld24xxName}_deactivate_presence_led`,
       timeOut: `number.${this.ld24xxName}_timeout`,
-      greenStatuLed: `light.${this.ld24xxName}_green_led_status`,
+      greenStatuLed: `light.${this.ld24xxName}_status_led_esp32`, 
       bluetooth: `switch.${this.ld24xxName}_control_bluetooth`,
       rebootEsp: `button.${this.ld24xxName}_esp_reboot`,
       firmwareUpgrade: `update.${this.ld24xxName}_firmware`,
@@ -413,7 +413,8 @@ export class Ld2410CustomCard extends LitElement {
                 ${this.getLD2410DeviceNameDropdown(this.config.devices_name)}
                 
          <!-- #############################################################     options    ############################################################# -->
-                <div style="flex-grow:1"></div>
+                
+              <div style="flex-grow:1"></div>
                 ${
                   this._show_options === false
                     ? html`
@@ -450,6 +451,7 @@ export class Ld2410CustomCard extends LitElement {
                 ${
                   this._show_options
                     ? html`
+                    <div style="font-size:10px">ver.: ${CARD_VERSION}</div>
                         <div class="select-options-container">
                           <div class="select-options-item">
                             <div class="option-select-title">Baud Rate</div>

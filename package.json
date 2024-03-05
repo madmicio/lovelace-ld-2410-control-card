@@ -42,7 +42,8 @@
     },
     "scripts": {
         "start": "rollup -c rollup.config.dev.js --watch",
-        "build": "npm run rollup",
+        "build": "npm run rollup && npm run add-version",
+        "add-version": "cross-var replace-in-file \"@LD2410_CONTROL_CARD_VERSION_PLACEHOLDER@\" \"$npm_package_version\" \"dist/lovelace-ld2410-control-card.js\"",
         "rollup": "rollup -c"
     }
 }
